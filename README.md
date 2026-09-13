@@ -91,6 +91,29 @@ It fails on invented hops (no evidence), companions without evidence or relation
 companions drawn on the path, and over-cap companion counts. Structural shape lives in
 [`schema/model.schema.json`](schema/model.schema.json).
 
+Run the full golden suite (lint + layout geometry + adapter + no-leak checks) with:
+
+```bash
+npm test
+```
+
+## Evidence adapters
+
+The linter proves a model is *internally* honest. Adapters make the evidence *real*: they
+derive the model from an actual source instead of trusting the agent to remember it. The
+Kubernetes adapter turns a `kubectl ... -o json` dump into the model, using only resource
+kinds/names and env/Secret **names** as evidence:
+
+```bash
+kubectl get ingress,svc,endpoints,deploy -n checkout -o json > dump.json
+node adapters/k8s/from-k8s.mjs dump.json --out checkout.model.json
+node scripts/layout.mjs checkout.model.json --svg checkout.svg
+```
+
+It never reads Secret or ConfigMap **values**, and it strips any `user:pass` credentials
+from hostnames. A golden test decodes the Secret in the fixture and asserts its value never
+reaches the model. This is what makes the honesty enforceable rather than asserted.
+
 ## The idea in five rules
 
 1. Verified spine vs best-effort companions (two layers: `linked` and `around`).
@@ -114,6 +137,7 @@ Full detail in [`skills/honest-arch-diagrams/references/honesty-rules.md`](skill
 - [`DEFINITION.md`](DEFINITION.md) — objective, scope, differentiator.
 - [`ROADMAP.md`](ROADMAP.md) — where it goes next and how to contribute.
 - [`skills/honest-arch-diagrams/SKILL.md`](skills/honest-arch-diagrams/SKILL.md) — the skill entry point.
+- [`adapters/k8s/from-k8s.mjs`](adapters/k8s/from-k8s.mjs) — derive a model from a Kubernetes JSON dump.
 
 ## License
 

@@ -29,14 +29,18 @@ around them, never at their expense.
 - `npm run layout` regenerates `examples/checkout-service.layout.svg`.
 
 ## v0.4 — Evidence adapters (opt-in)
-- `adapters/k8s`: hostname → Ingress/HTTPRoute → Service → Endpoints/Pod, plus companions
-  from env/args hosts, Secret **names** (never values), ConfigMap hosts.
-- `adapters/terraform`: plan/state → managed resources as verified nodes.
-- `adapters/openapi`: servers + dependencies as declared edges.
+- `adapters/k8s` ✅: Kubernetes JSON dump → model. Ingress/HTTPRoute → Service →
+  Endpoints/Pod for the spine; companions from container env hosts and Secret **names**
+  (never values). Hostnames are stripped of credentials. `npm run from-k8s`.
+- Golden tests ✅ (`scripts/test.mjs`, `npm test`): every example lints, layout geometry is
+  finite and keeps Data under Workload, and the k8s adapter is asserted to derive real
+  evidence and **never leak a Secret value**.
+- `adapters/terraform` (next): plan/state → managed resources as verified nodes.
+- `adapters/openapi` (next): servers + dependencies as declared edges.
 - Each adapter outputs the same model; the core stays adapter-agnostic.
 
-## v0.5 — Golden tests + distribution
-- Golden example set with CI that renders each `.d2` and checks it is non-empty and valid.
+## v0.5 — CI + distribution
+- Run `npm test` in CI on every push; render each example and check it is non-empty.
 - Submit to skills.sh and list on agentskills.io.
 - README badges, install one-liner, screenshot.
 

@@ -1,0 +1,117 @@
+{
+  "app": "checkout",
+  "hops": [
+    {
+      "id": "dns",
+      "kind": "dns",
+      "label": "checkout.example.com",
+      "lane": "Edge",
+      "evidence": "Ingress checkout host"
+    },
+    {
+      "id": "tls",
+      "kind": "tls",
+      "label": "TLS termination",
+      "lane": "Edge",
+      "evidence": "Ingress TLS secret checkout-tls"
+    },
+    {
+      "id": "ingress",
+      "kind": "ingress",
+      "label": "Ingress",
+      "lane": "Gateway",
+      "evidence": "Ingress checkout"
+    },
+    {
+      "id": "oauth",
+      "kind": "oauth2_proxy",
+      "label": "oauth2-proxy",
+      "lane": "Identity",
+      "evidence": "Ingress checkout auth-url annotation"
+    },
+    {
+      "id": "svc",
+      "kind": "service",
+      "label": "checkout",
+      "lane": "App",
+      "evidence": "Service checkout"
+    },
+    {
+      "id": "endpoints",
+      "kind": "endpoints",
+      "label": "Endpoints",
+      "lane": "Workload",
+      "evidence": "Endpoints checkout"
+    },
+    {
+      "id": "pod",
+      "kind": "pod",
+      "label": "checkout pod",
+      "lane": "Workload",
+      "evidence": "Deployment checkout"
+    }
+  ],
+  "edges": [
+    {
+      "from": "dns",
+      "to": "tls",
+      "path": true
+    },
+    {
+      "from": "tls",
+      "to": "ingress",
+      "path": true
+    },
+    {
+      "from": "ingress",
+      "to": "oauth",
+      "path": true
+    },
+    {
+      "from": "oauth",
+      "to": "svc",
+      "path": true
+    },
+    {
+      "from": "svc",
+      "to": "endpoints",
+      "path": true
+    },
+    {
+      "from": "endpoints",
+      "to": "pod",
+      "path": true
+    }
+  ],
+  "companions": [
+    {
+      "id": "checkout-db",
+      "kind": "db",
+      "label": "Checkout Db",
+      "relation": "linked",
+      "evidence": "secret checkout-db",
+      "subtitle": "uses",
+      "anchor": "svc"
+    },
+    {
+      "id": "redis-host",
+      "kind": "db",
+      "label": "Redis",
+      "relation": "linked",
+      "evidence": "env REDIS_HOST",
+      "subtitle": "uses",
+      "anchor": "svc"
+    },
+    {
+      "id": "prometheus",
+      "kind": "controller",
+      "label": "Prometheus",
+      "relation": "around",
+      "evidence": "namespace checkout",
+      "subtitle": "release"
+    }
+  ],
+  "caps": {
+    "companions": 8
+  }
+}

@@ -38,6 +38,9 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 1. **Gather evidence.** From the description, repo, manifests, or telemetry, collect only
    facts: which hops are on the path, which dependencies have concrete evidence
    (env host, Secret *name*, ConfigMap host, declared server). Never read Secret values.
+   For a live Kubernetes app, skip hand-building: dump the resources and derive the model,
+   e.g. `kubectl get ingress,svc,endpoints,deploy -n <ns> -o json > d.json` then
+   `node adapters/k8s/from-k8s.mjs d.json --out <app>.model.json`.
 2. **Build the model.** Fill `{ hops[], edges[], companions[] }` per
    `references/data-model.md`. Stamp each element with `evidence` and, for companions,
    `relation` (`linked` = evidence-backed edge; `around` = co-located by release/owner).
@@ -70,6 +73,7 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 - `references/layout.md` — ranking, orthogonal elbows, the hop-arc.
 - `references/rendering-d2.md` — D2 output patterns (+ Mermaid/SVG notes).
 - `scripts/layout.mjs` — reference lane packer + elbow router; emits geometry JSON and SVG.
+- `adapters/k8s/from-k8s.mjs` — derive a model from a Kubernetes JSON dump (evidence, no secret values).
 
 ## Example
 

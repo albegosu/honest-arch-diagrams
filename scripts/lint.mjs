@@ -20,7 +20,7 @@ const LANES = new Set(['Edge', 'Gateway', 'Identity', 'App', 'Workload', 'Data']
 const LINKED_SUBTITLES = new Set(['uses', 'app', 'auth']);
 
 /** Collect honesty violations for one parsed model. Returns string[] of errors. */
-function lintModel(model) {
+export function lintModel(model) {
   const errors = [];
   const push = (msg) => errors.push(msg);
 
@@ -145,4 +145,5 @@ function main() {
   console.log(`\nAll ${targets.length} model(s) passed.`);
 }
 
-main();
+// Run only when invoked directly.
+if (import.meta.url === `file://${process.argv[1]}`) main();
