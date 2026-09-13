@@ -1,5 +1,9 @@
 # honest-arch-diagrams
 
+[![CI](https://github.com/albegosu/honest-arch-diagrams/actions/workflows/ci.yml/badge.svg)](https://github.com/albegosu/honest-arch-diagrams/actions/workflows/ci.yml)
+[![skills.sh](https://skills.sh/b/albegosu/honest-arch-diagrams)](https://skills.sh/albegosu/honest-arch-diagrams)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 An [Agent Skill](https://agentskills.io) for drawing **honest service-topology and
 request-path diagrams**. It separates what is *verified* (the request path) from what is
 *inferred* (the companions around it), and it never invents components.
@@ -88,8 +92,9 @@ node scripts/lint.mjs examples/checkout-service.model.json
 ```
 
 It fails on invented hops (no evidence), companions without evidence or relation,
-companions drawn on the path, and over-cap companion counts. Structural shape lives in
-[`schema/model.schema.json`](schema/model.schema.json).
+companions drawn on the path, and over-cap companion counts. The structural shape is a live
+contract in [`schema/model.schema.json`](schema/model.schema.json), enforced by a
+zero-dependency validator (`npm run schema`) that the linter and tests both run.
 
 Run the full golden suite (lint + layout geometry + adapter + no-leak checks) with:
 

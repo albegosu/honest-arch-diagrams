@@ -11,6 +11,7 @@
 
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { validateSchema } from './schema.mjs';
 
 const HOP_KINDS = new Set([
   'dns', 'lb', 'tls', 'ingress', 'httproute', 'oauth2_proxy', 'service', 'endpoints', 'pod',
@@ -25,11 +26,10 @@ export function lintModel(model) {
   const push = (msg) => errors.push(msg);
 
   if (!model || typeof model !== 'object') return ['model is not an object'];
-  if (!model.app) push('missing "app"');
-  for (const key of ['hops', 'edges', 'companions']) {
-    if (!Array.isArray(model[key])) push(`"${key}" must be an array`);
-  }
-  if (errors.length) return errors;
+
+  // Structure first: the published schema is the contract. Fix shape before honesty.
+  const schemaErrors = validateSchema(model);
+  if (schemaErrors.length) return schemaErrors.map((e) => `schema ${e}`);
 
   const hopIds = new Set();
   for (const h of model.hops) {

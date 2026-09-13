@@ -13,6 +13,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lintModel } from './lint.mjs';
 import { layout } from './layout.mjs';
+import { validateSchema } from './schema.mjs';
 import { fromK8s } from '../adapters/k8s/from-k8s.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -35,7 +36,9 @@ const exDir = join(root, 'examples');
 const models = readdirSync(exDir).filter((f) => f.endsWith('.model.json'));
 check('at least two example models exist', models.length >= 2, `found ${models.length}`);
 for (const f of models) {
-  const errors = lintModel(readJson(join(exDir, f)));
+  const model = readJson(join(exDir, f));
+  check(`${f} matches the schema`, validateSchema(model).length === 0, validateSchema(model).join('; '));
+  const errors = lintModel(model);
   check(`${f} passes honesty lint`, errors.length === 0, errors.join('; '));
 }
 
@@ -100,6 +103,64 @@ for (const value of secretValues) {
 }
 // Belt and suspenders: the recognizable password token must be absent.
 check('password token absent from model', !serialized.includes('SUPERSECRETPASS'));
+
+// --- 4. the linter must REJECT dishonest (but schema-valid) models ---
+console.log('# honesty rejections (negative tests)');
+const spine = () => ({
+  app: 'x',
+  hops: [{ id: 'svc', kind: 'service', label: 'x', lane: 'App', evidence: 'Service x' }],
+  edges: [],
+  companions: [],
+  caps: { companions: 8 },
+});
+const rejects = (name, mutate) => {
+  const m = spine();
+  mutate(m);
+  check(name, lintModel(m).length > 0, 'expected at least one violation');
+};
+rejects('rejects companion count over the cap', (m) => {
+  m.caps.companions = 1;
+  m.companions.push(
+    { id: 'a', kind: 'db', label: 'A', relation: 'around', evidence: 'ns', subtitle: 'release' },
+    { id: 'b', kind: 'db', label: 'B', relation: 'around', evidence: 'ns', subtitle: 'release' },
+  );
+});
+rejects('rejects a companion drawn on the accented path', (m) => {
+  m.companions.push({ id: 'pg', kind: 'db', label: 'PG', relation: 'linked', evidence: 'secret pg', subtitle: 'uses', anchor: 'svc' });
+  m.edges.push({ from: 'svc', to: 'pg', path: true });
+});
+rejects('rejects a linked companion with no anchor', (m) => {
+  m.companions.push({ id: 'pg', kind: 'db', label: 'PG', relation: 'linked', evidence: 'secret pg', subtitle: 'uses' });
+});
+rejects('rejects a companion that duplicates a hop id', (m) => {
+  m.companions.push({ id: 'svc', kind: 'db', label: 'PG', relation: 'linked', evidence: 'secret pg', subtitle: 'uses', anchor: 'svc' });
+});
+
+// --- 5. adapter derives an HTTPRoute spine (not just Ingress) ---
+console.log('# k8s adapter (HTTPRoute branch)');
+const httpRouteDump = {
+  kind: 'List',
+  items: [
+    {
+      kind: 'HTTPRoute',
+      metadata: { name: 'orders', namespace: 'orders' },
+      spec: { hostnames: ['orders.example.com'], rules: [{ backendRefs: [{ name: 'orders' }] }] },
+    },
+    { kind: 'Service', metadata: { name: 'orders', namespace: 'orders' }, spec: { selector: { app: 'orders' } } },
+    {
+      kind: 'Deployment',
+      metadata: { name: 'orders', namespace: 'orders' },
+      spec: {
+        selector: { matchLabels: { app: 'orders' } },
+        template: { metadata: { labels: { app: 'orders' } }, spec: { containers: [{ name: 'orders', env: [{ name: 'DB_HOST', value: 'mysql.orders.svc:3306' }] }] } },
+      },
+    },
+  ],
+};
+const routeModel = fromK8s(httpRouteDump);
+check('adapter output lints clean (httproute)', lintModel(routeModel).length === 0, lintModel(routeModel).join('; '));
+check('derives an httproute hop', routeModel.hops.some((h) => h.kind === 'httproute'));
+check('derives a linked companion from env host', routeModel.companions.some((c) => c.relation === 'linked' && /^env /.test(c.evidence)));
 
 console.log(`\n${failures === 0 ? 'PASS' : 'FAIL'} — ${failures} failing check(s).`);
 process.exit(failures === 0 ? 0 : 1);

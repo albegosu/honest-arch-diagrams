@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: lint + golden tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # No dependencies: the whole pipeline is zero-dependency Node (18+).
+      - name: Validate schema
+        run: node scripts/schema.mjs
+
+      - name: Honesty lint
+        run: node scripts/lint.mjs
+
+      - name: Golden tests
+        run: node scripts/test.mjs

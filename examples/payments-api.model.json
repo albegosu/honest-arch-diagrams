@@ -1,0 +1,22 @@
+{
+  "app": "payments-api",
+  "hops": [
+    { "id": "dns", "kind": "dns", "label": "payments.example.com", "lane": "Edge", "evidence": "HTTPRoute payments hostname" },
+    { "id": "route", "kind": "httproute", "label": "HTTPRoute", "lane": "Gateway", "evidence": "HTTPRoute payments" },
+    { "id": "svc", "kind": "service", "label": "payments-api", "lane": "App", "evidence": "HTTPRoute backendRef" },
+    { "id": "endpoints", "kind": "endpoints", "label": "Endpoints", "lane": "Workload", "evidence": "Endpoints payments-api" },
+    { "id": "pod", "kind": "pod", "label": "payments-api pod", "lane": "Workload", "evidence": "Deployment payments-api" }
+  ],
+  "edges": [
+    { "from": "dns", "to": "route", "path": true },
+    { "from": "route", "to": "svc", "path": true },
+    { "from": "svc", "to": "endpoints", "path": true },
+    { "from": "endpoints", "to": "pod", "path": true }
+  ],
+  "companions": [
+    { "id": "ledger-db", "kind": "db", "label": "MySQL", "relation": "linked", "evidence": "secret payments-db", "subtitle": "uses", "anchor": "svc" },
+    { "id": "receipts", "kind": "cloud", "label": "S3 receipts", "relation": "linked", "evidence": "env RECEIPTS_BUCKET", "subtitle": "uses", "anchor": "svc" },
+    { "id": "grafana", "kind": "controller", "label": "Grafana", "relation": "around", "evidence": "namespace payments", "subtitle": "release" }
+  ],
+  "caps": { "companions": 8 }
+}

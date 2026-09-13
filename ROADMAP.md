@@ -39,10 +39,21 @@ around them, never at their expense.
 - `adapters/openapi` (next): servers + dependencies as declared edges.
 - Each adapter outputs the same model; the core stays adapter-agnostic.
 
-## v0.5 — CI + distribution
-- Run `npm test` in CI on every push; render each example and check it is non-empty.
-- Submit to skills.sh and list on agentskills.io.
-- README badges, install one-liner, screenshot.
+## v0.5 — CI + schema contract + distribution ✅
+- GitHub Actions (`.github/workflows/ci.yml`) runs schema, lint, and golden tests on every
+  push and PR to `main`.
+- The published schema is now a live contract: `scripts/schema.mjs` is a zero-dependency
+  validator wired into both the linter and the tests.
+- Negative tests assert the linter **rejects** dishonest models (over-cap, companion on the
+  path, linked without anchor, companion duplicating a hop).
+- Second, distinct example (`payments-api`: HTTPRoute, no auth, cloud + db companions) plus an
+  HTTPRoute adapter test, broadening grammar coverage.
+- skills.sh install badge in the README.
+
+## v0.6 — More adapters
+- `adapters/terraform`: plan/state → managed resources as verified nodes.
+- `adapters/openapi`: servers + dependencies as declared edges.
+- Each adapter outputs the same model; the core stays adapter-agnostic.
 
 ## How to contribute
 - New lane kinds or evidence sources are welcome as long as they keep the
