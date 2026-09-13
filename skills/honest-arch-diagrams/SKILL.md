@@ -38,9 +38,13 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 1. **Gather evidence.** From the description, repo, manifests, or telemetry, collect only
    facts: which hops are on the path, which dependencies have concrete evidence
    (env host, Secret *name*, ConfigMap host, declared server). Never read Secret values.
-   For a live Kubernetes app, skip hand-building: dump the resources and derive the model,
-   e.g. `kubectl get ingress,svc,endpoints,deploy -n <ns> -o json > d.json` then
-   `node adapters/k8s/from-k8s.mjs d.json --out <app>.model.json`.
+   When a real source exists, skip hand-building and derive the model from it:
+   - Kubernetes: `kubectl get ingress,svc,endpoints,deploy -n <ns> -o json > d.json` then
+     `node adapters/k8s/from-k8s.mjs d.json --out <app>.model.json`.
+   - Terraform: `terraform show -json > t.json` then `node adapters/terraform/from-terraform.mjs t.json --out <app>.model.json`.
+   - OpenAPI: `node adapters/openapi/from-openapi.mjs <spec>.json --out <app>.model.json`.
+   Each source carries different evidence strength (runtime > infrastructure > declared);
+   keep that in mind when reading the result.
 2. **Build the model.** Fill `{ hops[], edges[], companions[] }` per
    `references/data-model.md`. Stamp each element with `evidence` and, for companions,
    `relation` (`linked` = evidence-backed edge; `around` = co-located by release/owner).
@@ -74,6 +78,8 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 - `references/rendering-d2.md` — D2 output patterns (+ Mermaid/SVG notes).
 - `scripts/layout.mjs` — reference lane packer + elbow router; emits geometry JSON and SVG.
 - `adapters/k8s/from-k8s.mjs` — derive a model from a Kubernetes JSON dump (evidence, no secret values).
+- `adapters/terraform/from-terraform.mjs` — derive from `terraform show -json` (around by default, linked on reference).
+- `adapters/openapi/from-openapi.mjs` — derive from an OpenAPI 3.x document (declared `x-depends-on` only).
 
 ## Example
 

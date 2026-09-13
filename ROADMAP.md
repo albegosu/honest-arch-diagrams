@@ -50,10 +50,21 @@ around them, never at their expense.
   HTTPRoute adapter test, broadening grammar coverage.
 - skills.sh install badge in the README.
 
-## v0.6 — More adapters
-- `adapters/terraform`: plan/state → managed resources as verified nodes.
-- `adapters/openapi`: servers + dependencies as declared edges.
-- Each adapter outputs the same model; the core stays adapter-agnostic.
+## v0.6 — More adapters ✅
+- `adapters/terraform` ✅: `terraform show -json` (state or plan) → model. Edge/gateway/app
+  resources become the spine; datastores default to `around` (co-located by stack) and are
+  promoted to `linked` only when the app resource explicitly references them. Resource
+  `values` (passwords) are never emitted. `npm run from-terraform`.
+- `adapters/openapi` ✅: OpenAPI 3.x JSON → model. `servers[0]` + `info.title` + a global
+  oauth2/openIdConnect scheme form the spine; downstream dependencies come only from the
+  declared `x-depends-on` extension, never inferred. `npm run from-openapi`.
+- Golden tests assert the terraform around/linked split and that openapi invents no
+  companions beyond `x-depends-on`.
+
+## v0.7 — Distribution polish
+- Submit to skills.sh and list on agentskills.io; install-count badge.
+- `.claude-plugin/marketplace.json` for the Claude Code `/plugin` flow.
+- Optional YAML input for the OpenAPI adapter.
 
 ## How to contribute
 - New lane kinds or evidence sources are welcome as long as they keep the

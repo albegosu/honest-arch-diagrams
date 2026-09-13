@@ -105,9 +105,14 @@ npm test
 ## Evidence adapters
 
 The linter proves a model is *internally* honest. Adapters make the evidence *real*: they
-derive the model from an actual source instead of trusting the agent to remember it. The
-Kubernetes adapter turns a `kubectl ... -o json` dump into the model, using only resource
-kinds/names and env/Secret **names** as evidence:
+derive the model from an actual source instead of trusting the agent to remember it. Each
+source carries a different strength of evidence, and the adapters reflect that without
+inflating it.
+
+### Kubernetes — runtime evidence
+
+Turns a `kubectl ... -o json` dump into the model, using only resource kinds/names and
+env/Secret **names** as evidence:
 
 ```bash
 kubectl get ingress,svc,endpoints,deploy -n checkout -o json > dump.json
@@ -117,7 +122,37 @@ node scripts/layout.mjs checkout.model.json --svg checkout.svg
 
 It never reads Secret or ConfigMap **values**, and it strips any `user:pass` credentials
 from hostnames. A golden test decodes the Secret in the fixture and asserts its value never
-reaches the model. This is what makes the honesty enforceable rather than asserted.
+reaches the model.
+
+### Terraform — infrastructure evidence
+
+Turns `terraform show -json` (state or plan) into the model. Terraform proves a resource
+*exists in a stack*, not that the request path traverses it, so the adapter is deliberately
+conservative:
+
+```bash
+terraform show -json > tfshow.json
+node adapters/terraform/from-terraform.mjs tfshow.json --out orders.model.json
+```
+
+DNS, load balancers, TLS certs, API gateways, and the app resource (Lambda / ECS service /
+target group) form the spine. Datastores default to `around` companions (co-located by the
+stack) and are promoted to `linked` **only** when the app resource explicitly references
+them in the plan `configuration`. Resource `values` (which may hold passwords) are never
+emitted.
+
+### OpenAPI — declared-contract evidence
+
+Turns an OpenAPI 3.x document (JSON) into the model. This is the weakest evidence — what the
+contract *declares*, not what runs — so the adapter stays minimal:
+
+```bash
+node adapters/openapi/from-openapi.mjs orders.openapi.json --out orders.model.json
+```
+
+`servers[0]`, `info.title`, and a global oauth2/openIdConnect scheme form the spine.
+Downstream dependencies come **only** from the explicit `x-depends-on` extension; nothing is
+inferred from paths or descriptions. No `x-depends-on`, no linked companions.
 
 ## The idea in five rules
 
@@ -143,6 +178,8 @@ Full detail in [`skills/honest-arch-diagrams/references/honesty-rules.md`](skill
 - [`ROADMAP.md`](ROADMAP.md) — where it goes next and how to contribute.
 - [`skills/honest-arch-diagrams/SKILL.md`](skills/honest-arch-diagrams/SKILL.md) — the skill entry point.
 - [`adapters/k8s/from-k8s.mjs`](adapters/k8s/from-k8s.mjs) — derive a model from a Kubernetes JSON dump.
+- [`adapters/terraform/from-terraform.mjs`](adapters/terraform/from-terraform.mjs) — derive from `terraform show -json`.
+- [`adapters/openapi/from-openapi.mjs`](adapters/openapi/from-openapi.mjs) — derive from an OpenAPI 3.x document.
 
 ## License
 

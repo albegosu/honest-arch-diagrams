@@ -1,0 +1,81 @@
+{
+  "app": "orders",
+  "hops": [
+    {
+      "id": "dns",
+      "kind": "dns",
+      "label": "orders.example.com",
+      "lane": "Edge",
+      "evidence": "terraform aws_route53_record.orders"
+    },
+    {
+      "id": "tls",
+      "kind": "tls",
+      "label": "TLS termination",
+      "lane": "Edge",
+      "evidence": "terraform aws_acm_certificate.orders"
+    },
+    {
+      "id": "ingress",
+      "kind": "ingress",
+      "label": "API gateway",
+      "lane": "Gateway",
+      "evidence": "terraform aws_apigatewayv2_api.orders"
+    },
+    {
+      "id": "svc",
+      "kind": "service",
+      "label": "orders",
+      "lane": "App",
+      "evidence": "terraform aws_lambda_function.orders"
+    }
+  ],
+  "edges": [
+    {
+      "from": "dns",
+      "to": "tls",
+      "path": true
+    },
+    {
+      "from": "tls",
+      "to": "ingress",
+      "path": true
+    },
+    {
+      "from": "ingress",
+      "to": "svc",
+      "path": true
+    }
+  ],
+  "companions": [
+    {
+      "id": "aws-db-instance-orders",
+      "kind": "db",
+      "label": "Orders",
+      "relation": "linked",
+      "evidence": "references aws_db_instance.orders",
+      "subtitle": "uses",
+      "anchor": "svc"
+    },
+    {
+      "id": "aws-s3-bucket-receipts",
+      "kind": "cloud",
+      "label": "Receipts",
+      "relation": "linked",
+      "evidence": "references aws_s3_bucket.receipts",
+      "subtitle": "uses",
+      "anchor": "svc"
+    },
+    {
+      "id": "aws-elasticache-cluster-sessions",
+      "kind": "db",
+      "label": "Sessions",
+      "relation": "around",
+      "evidence": "terraform stack (aws_elasticache_cluster.sessions)",
+      "subtitle": "release"
+    }
+  ],
+  "caps": {
+    "companions": 8
+  }
+}

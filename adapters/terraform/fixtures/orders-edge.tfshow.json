@@ -1,0 +1,45 @@
+{
+  "format_version": "1.2",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        { "address": "aws_route53_record.orders", "mode": "managed", "type": "aws_route53_record", "name": "orders", "values": { "fqdn": "orders.example.com", "name": "orders.example.com" } },
+        { "address": "aws_acm_certificate.orders", "mode": "managed", "type": "aws_acm_certificate", "name": "orders", "values": { "domain_name": "orders.example.com" } },
+        { "address": "aws_apigatewayv2_api.orders", "mode": "managed", "type": "aws_apigatewayv2_api", "name": "orders", "values": { "protocol_type": "HTTP" } },
+        { "address": "aws_lambda_function.orders", "mode": "managed", "type": "aws_lambda_function", "name": "orders", "values": { "function_name": "orders", "runtime": "nodejs20.x" } },
+        { "address": "aws_db_instance.orders", "mode": "managed", "type": "aws_db_instance", "name": "orders", "values": { "engine": "postgres", "username": "orders", "password": "TFSECRETPW" } },
+        { "address": "aws_s3_bucket.receipts", "mode": "managed", "type": "aws_s3_bucket", "name": "receipts", "values": { "bucket": "orders-receipts" } },
+        { "address": "aws_elasticache_cluster.sessions", "mode": "managed", "type": "aws_elasticache_cluster", "name": "sessions", "values": { "engine": "redis" } }
+      ]
+    }
+  },
+  "configuration": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_lambda_function.orders",
+          "type": "aws_lambda_function",
+          "name": "orders",
+          "expressions": {
+            "environment": {
+              "variables": {
+                "references": [
+                  "aws_db_instance.orders.endpoint",
+                  "aws_db_instance.orders",
+                  "aws_s3_bucket.receipts.bucket",
+                  "aws_s3_bucket.receipts"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "address": "aws_elasticache_cluster.sessions",
+          "type": "aws_elasticache_cluster",
+          "name": "sessions",
+          "expressions": {}
+        }
+      ]
+    }
+  }
+}

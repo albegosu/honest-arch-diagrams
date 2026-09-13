@@ -15,6 +15,8 @@ import { lintModel } from './lint.mjs';
 import { layout } from './layout.mjs';
 import { validateSchema } from './schema.mjs';
 import { fromK8s } from '../adapters/k8s/from-k8s.mjs';
+import { fromTerraform } from '../adapters/terraform/from-terraform.mjs';
+import { fromOpenApi } from '../adapters/openapi/from-openapi.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 let failures = 0;
@@ -53,10 +55,13 @@ for (const f of models) {
 
   const dataNodes = g.nodes.filter((n) => n.band === 'Data');
   if (dataNodes.length) {
-    const workload = g.nodes.filter((n) => n.lane === 'Workload' && !n.satellite);
-    const underWorkload = dataNodes.every((d) =>
-      workload.some((w) => Math.abs(w.x - d.x) <= 1 && d.y > w.y));
-    check(`${f} keeps Data band under Workload`, underWorkload && workload.length > 0);
+    // Data hangs under Workload when that lane exists, else under the deepest spine lane (App).
+    const spineNodes = g.nodes.filter((n) => !n.satellite);
+    const workload = spineNodes.filter((n) => n.lane === 'Workload');
+    const anchorLane = workload.length ? workload : spineNodes.filter((n) => n.lane === 'App');
+    const laneName = workload.length ? 'Workload' : 'App';
+    const underAnchor = dataNodes.every((d) => anchorLane.some((w) => Math.abs(w.x - d.x) <= 1 && d.y > w.y));
+    check(`${f} keeps Data band under ${laneName}`, underAnchor && anchorLane.length > 0);
   }
 }
 
@@ -161,6 +166,29 @@ const routeModel = fromK8s(httpRouteDump);
 check('adapter output lints clean (httproute)', lintModel(routeModel).length === 0, lintModel(routeModel).join('; '));
 check('derives an httproute hop', routeModel.hops.some((h) => h.kind === 'httproute'));
 check('derives a linked companion from env host', routeModel.companions.some((c) => c.relation === 'linked' && /^env /.test(c.evidence)));
+
+// --- 6. terraform adapter: edge spine + honest around/linked split, no leaked values ---
+console.log('# terraform adapter (around by default, linked on reference)');
+const tfDump = readJson(join(root, 'adapters/terraform/fixtures/orders-edge.tfshow.json'));
+const tfModel = fromTerraform(tfDump);
+check('terraform output lints clean', lintModel(tfModel).length === 0, lintModel(tfModel).join('; '));
+const tfHopKinds = new Set(tfModel.hops.map((h) => h.kind));
+check('derives an edge spine (dns + tls + ingress + service)', ['dns', 'tls', 'ingress', 'service'].every((k) => tfHopKinds.has(k)));
+const referencedDb = tfModel.companions.find((c) => c.id === 'aws-db-instance-orders');
+const unreferencedCache = tfModel.companions.find((c) => c.id === 'aws-elasticache-cluster-sessions');
+check('referenced datastore is promoted to linked', referencedDb?.relation === 'linked', referencedDb?.relation);
+check('unreferenced datastore stays around (co-located only)', unreferencedCache?.relation === 'around', unreferencedCache?.relation);
+check('terraform never leaks a resource value (password)', !JSON.stringify(tfModel).includes('TFSECRETPW'));
+
+// --- 7. openapi adapter: declared spine + x-depends-on only ---
+console.log('# openapi adapter (declared contract only)');
+const oapiDoc = readJson(join(root, 'adapters/openapi/fixtures/orders.openapi.json'));
+const oapiModel = fromOpenApi(oapiDoc);
+check('openapi output lints clean', lintModel(oapiModel).length === 0, lintModel(oapiModel).join('; '));
+const oapiKinds = new Set(oapiModel.hops.map((h) => h.kind));
+check('derives dns + identity + service from the contract', ['dns', 'oauth2_proxy', 'service'].every((k) => oapiKinds.has(k)));
+check('every companion comes from x-depends-on (nothing inferred)', oapiModel.companions.length === (oapiDoc['x-depends-on']?.length ?? 0));
+check('x-depends-on companions are linked to the service', oapiModel.companions.every((c) => c.relation === 'linked' && c.anchor === 'svc'));
 
 console.log(`\n${failures === 0 ? 'PASS' : 'FAIL'} — ${failures} failing check(s).`);
 process.exit(failures === 0 ? 0 : 1);

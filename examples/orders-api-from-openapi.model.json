@@ -1,0 +1,61 @@
+{
+  "app": "Orders API",
+  "hops": [
+    {
+      "id": "dns",
+      "kind": "dns",
+      "label": "orders.example.com",
+      "lane": "Edge",
+      "evidence": "OpenAPI servers[0].url"
+    },
+    {
+      "id": "oauth",
+      "kind": "oauth2_proxy",
+      "label": "oauth2",
+      "lane": "Identity",
+      "evidence": "OpenAPI security oauth2"
+    },
+    {
+      "id": "svc",
+      "kind": "service",
+      "label": "Orders API",
+      "lane": "App",
+      "evidence": "OpenAPI info.title"
+    }
+  ],
+  "edges": [
+    {
+      "from": "dns",
+      "to": "oauth",
+      "path": true
+    },
+    {
+      "from": "oauth",
+      "to": "svc",
+      "path": true
+    }
+  ],
+  "companions": [
+    {
+      "id": "payments-api",
+      "kind": "service",
+      "label": "Payments API",
+      "relation": "linked",
+      "evidence": "x-depends-on: POST /charge",
+      "subtitle": "uses",
+      "anchor": "svc"
+    },
+    {
+      "id": "postgres",
+      "kind": "db",
+      "label": "Postgres",
+      "relation": "linked",
+      "evidence": "x-depends-on: orders datastore",
+      "subtitle": "uses",
+      "anchor": "svc"
+    }
+  ],
+  "caps": {
+    "companions": 8
+  }
+}

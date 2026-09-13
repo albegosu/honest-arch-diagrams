@@ -100,11 +100,13 @@ export function layout(model) {
 
   const xForKind = (kinds) => {
     const rank = sortedRanks.find((r) => kinds.includes(r));
-    return rank != null ? colX.get(rank) : START_X;
+    return rank != null ? colX.get(rank) : null;
   };
-  const workloadX = xForKind([5]) ?? xForKind([4]) ?? START_X; // pod/endpoints col
-  const appX = xForKind([4]) ?? START_X;                        // service col
-  const identityX = xForKind([3, 2]) ?? appX;                   // oauth/gateway col
+  // Fall back down the spine when a lane is absent (e.g. Terraform edge-only stacks have
+  // no Workload; datastores then hang under the deepest present spine lane).
+  const appX = xForKind([4]) ?? xForKind([3, 2]) ?? xForKind([1, 0]) ?? START_X; // service col
+  const workloadX = xForKind([5]) ?? appX;                                       // pod/endpoints col
+  const identityX = xForKind([3, 2]) ?? appX;                                    // oauth/gateway col
 
   const spineBottom = Math.max(...[...nodes.values()].map((n) => n.y + n.h), BASE_Y);
   const rowY = spineBottom + ROW_GAP;
@@ -208,9 +210,13 @@ function toSvg(g) {
     ...g.nodes.map((n) => ({ x: n.x, y: n.y, X: n.x + n.w, Y: n.y + n.h })),
     ...g.bands.map((b) => ({ x: b.x, y: b.y, X: b.x + b.w, Y: b.y + b.h })),
   ];
+  // Include linked-edge label extents so long evidence strings are not clipped.
+  const labelRights = g.edges
+    .filter((e) => e.kind === 'linked' && e.label)
+    .map((e) => e.lx + e.label.length * 6.2);
   const minX = Math.min(...all.map((a) => a.x)) - 24;
   const minY = Math.min(...all.map((a) => a.y)) - 24;
-  const maxX = Math.max(...all.map((a) => a.X)) + 24;
+  const maxX = Math.max(...all.map((a) => a.X), ...labelRights) + 24;
   const maxY = Math.max(...all.map((a) => a.Y)) + 40;
   const W = maxX - minX, H = maxY - minY;
 
