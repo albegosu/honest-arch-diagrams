@@ -66,4 +66,5 @@ Reject the model if any of these are true:
 5. `companions.length > caps.companions` and no summary node is present.
 6. Any edge with `path: true` touches a companion id.
 
-These map 1:1 to the future `schema/model.schema.json` and the v0.2 linter.
+These are enforced by `scripts/lint.mjs`; the structural shape is in
+`schema/model.schema.json`. Run `node scripts/lint.mjs <model.json>` before rendering.

@@ -1,0 +1,30 @@
+{
+  "name": "honest-arch-diagrams",
+  "version": "0.2.0",
+  "description": "Agent skill: honest service-topology / request-path diagrams. Verified path vs inferred companions, never hallucinate components.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "honest-arch-lint": "scripts/lint.mjs"
+  },
+  "scripts": {
+    "lint": "node scripts/lint.mjs",
+    "render": "d2 examples/checkout-service.d2 examples/checkout-service.svg"
+  },
+  "keywords": [
+    "agent-skills",
+    "ai-skills",
+    "architecture-diagrams",
+    "request-path",
+    "d2",
+    "devops"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/albegosu/honest-arch-diagrams.git"
+  },
+  "homepage": "https://github.com/albegosu/honest-arch-diagrams#readme",
+  "bugs": {
+    "url": "https://github.com/albegosu/honest-arch-diagrams/issues"
+  }
+}

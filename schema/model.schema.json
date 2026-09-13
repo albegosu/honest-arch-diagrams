@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/albegosu/honest-arch-diagrams/schema/model.schema.json",
+  "title": "Honest architecture model",
+  "description": "A request-path / service-topology model where every element carries its evidence. Structural rules only; cross-field honesty rules are enforced by scripts/lint.mjs.",
+  "type": "object",
+  "required": ["app", "hops", "edges", "companions"],
+  "additionalProperties": false,
+  "properties": {
+    "app": { "type": "string", "minLength": 1 },
+    "hops": {
+      "type": "array",
+      "description": "The verified request path, in order.",
+      "items": { "$ref": "#/$defs/hop" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" }
+    },
+    "companions": {
+      "type": "array",
+      "description": "Best-effort, off-path dependencies.",
+      "items": { "$ref": "#/$defs/companion" }
+    },
+    "caps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "companions": { "type": "integer", "minimum": 1, "default": 8 }
+      }
+    }
+  },
+  "$defs": {
+    "hopKind": {
+      "enum": ["dns", "lb", "tls", "ingress", "httproute", "oauth2_proxy", "service", "endpoints", "pod"]
+    },
+    "companionKind": {
+      "enum": ["db", "auth", "controller", "cloud", "service"]
+    },
+    "lane": {
+      "enum": ["Edge", "Gateway", "Identity", "App", "Workload", "Data"]
+    },
+    "hop": {
+      "type": "object",
+      "required": ["id", "kind", "label", "lane", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "$ref": "#/$defs/hopKind" },
+        "label": { "type": "string", "minLength": 1 },
+        "lane": { "$ref": "#/$defs/lane" },
+        "evidence": {
+          "type": "string",
+          "minLength": 1,
+          "description": "How you know this hop exists. Required: no evidence means the hop does not exist."
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "type": "string", "minLength": 1 },
+        "to": { "type": "string", "minLength": 1 },
+        "path": {
+          "type": "boolean",
+          "description": "true = accented/arterial spine edge. Companion edges are never path."
+        }
+      }
+    },
+    "companion": {
+      "type": "object",
+      "required": ["id", "kind", "label", "relation", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "$ref": "#/$defs/companionKind" },
+        "label": { "type": "string", "minLength": 1 },
+        "relation": {
+          "enum": ["linked", "around"],
+          "description": "linked = evidence-backed edge to an anchor; around = co-located by release/owner, no connector."
+        },
+        "evidence": { "type": "string", "minLength": 1 },
+        "subtitle": {
+          "enum": ["uses", "app", "auth", "release"]
+        },
+        "anchor": {
+          "type": "string",
+          "description": "linked only: id of the spine node the dashed edge attaches to."
+        }
+      }
+    }
+  }
+}

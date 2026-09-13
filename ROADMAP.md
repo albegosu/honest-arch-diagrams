@@ -8,14 +8,16 @@ around them, never at their expense.
 - References: honesty rules, visual grammar, layout, data model, D2 rendering.
 - One worked example (model JSON + D2 output).
 
-## v0.2 — Schema + linter
-- Publish a JSON Schema for the model (`schema/model.schema.json`).
-- Ship an honesty linter that fails on:
+## v0.2 — Schema + linter ✅
+- JSON Schema for the model (`schema/model.schema.json`).
+- Dependency-free honesty linter (`scripts/lint.mjs`) that fails on:
   - a hop with no evidence,
   - a companion with no `relation` or no evidence,
   - a companion drawn on the path,
+  - a duplicate between a hop and a companion,
   - companion count over the cap.
-- Wire the linter into a `scripts/lint.mjs` an agent can call.
+- `SKILL.md` instructs the agent to run the linter before rendering.
+- `package.json` exposes `npm run lint` and a `honest-arch-lint` bin.
 
 ## v0.3 — Reference layout
 - `scripts/layout.mjs`: lane packer (rank by lane, stack same-rank) + orthogonal elbow

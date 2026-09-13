@@ -22,20 +22,23 @@ GitHub Copilot CLI, OpenCode.
 
 ## Install
 
-Copy the skill into your agent's skills directory:
+From the marketplace:
 
 ```bash
-# Cursor / open Agent Skills
-cp -r skills/honest-arch-diagrams .cursor/skills/
-
-# Claude Code
-cp -r skills/honest-arch-diagrams .claude/skills/
-
-# GitHub Copilot
-cp -r skills/honest-arch-diagrams .github/skills/
+npx skills add albegosu/honest-arch-diagrams
 ```
 
-Or install from GitHub once published (see the skill's remote-rule import in your tool).
+Or copy the skill directly into your agent's skills directory:
+
+```bash
+git clone https://github.com/albegosu/honest-arch-diagrams
+cp -r honest-arch-diagrams/skills/honest-arch-diagrams .cursor/skills/   # Cursor
+cp -r honest-arch-diagrams/skills/honest-arch-diagrams .claude/skills/   # Claude Code
+cp -r honest-arch-diagrams/skills/honest-arch-diagrams .github/skills/   # GitHub Copilot
+```
+
+In Cursor you can also add it as a Remote Rule pointing at
+`https://github.com/albegosu/honest-arch-diagrams`.
 
 ## Use it
 
@@ -59,6 +62,20 @@ verified path; Postgres and Redis are `linked` companions (dashed, with the evid
 edge label); Prometheus is an `around` companion ("also in this release," no connector).
 
 ![Honest request-path diagram for the checkout service](examples/checkout-service.png)
+
+## Validate
+
+Every model is checked against the honesty rules before rendering. The linter is
+dependency-free (Node 18+):
+
+```bash
+node scripts/lint.mjs examples/checkout-service.model.json
+# PASS examples/checkout-service.model.json (7 hops, 3 companions)
+```
+
+It fails on invented hops (no evidence), companions without evidence or relation,
+companions drawn on the path, and over-cap companion counts. Structural shape lives in
+[`schema/model.schema.json`](schema/model.schema.json).
 
 ## The idea in five rules
 

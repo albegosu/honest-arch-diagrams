@@ -42,6 +42,8 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
    `references/data-model.md`. Stamp each element with `evidence` and, for companions,
    `relation` (`linked` = evidence-backed edge; `around` = co-located by release/owner).
 3. **Apply the honesty rules.** Drop any element that fails them. Cap companions (default 8).
+   Save the model as `<app>.model.json` and validate it before rendering:
+   `node scripts/lint.mjs <app>.model.json`. Fix every reported violation.
 4. **Lay out.** Assign lanes (Edge / Gateway / Identity / App / Workload / Data) and route
    edges per `references/visual-grammar.md` and `references/layout.md`.
 5. **Render.** Emit D2 first (`references/rendering-d2.md`); Mermaid or hand-built SVG as
