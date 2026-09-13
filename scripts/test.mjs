@@ -190,5 +190,34 @@ check('derives dns + identity + service from the contract', ['dns', 'oauth2_prox
 check('every companion comes from x-depends-on (nothing inferred)', oapiModel.companions.length === (oapiDoc['x-depends-on']?.length ?? 0));
 check('x-depends-on companions are linked to the service', oapiModel.companions.every((c) => c.relation === 'linked' && c.anchor === 'svc'));
 
+// --- 8. overflow: adapters trim to cap and layout draws +N more ---
+console.log('# overflow (cap + summary card)');
+const capped = fromOpenApi({
+  openapi: '3.0.3',
+  info: { title: 'Cap Demo' },
+  servers: [{ url: 'https://cap.example.com' }],
+  'x-depends-on': [
+    { name: 'A', kind: 'service' },
+    { name: 'B', kind: 'db' },
+    { name: 'C', kind: 'cloud' },
+  ],
+}, { cap: 2 });
+check('adapter trims companions to the cap', capped.companions.length === 2, `got ${capped.companions.length}`);
+check('adapter reports omitted count in overflow', capped.overflow?.count === 1, JSON.stringify(capped.overflow));
+check('capped adapter output still lints clean', lintModel(capped).length === 0, lintModel(capped).join('; '));
+const overflowGeom = layout({
+  app: 'x',
+  hops: [{ id: 'svc', kind: 'service', label: 'x', lane: 'App', evidence: 'Service x' }],
+  edges: [],
+  companions: [],
+  caps: { companions: 8 },
+  overflow: { count: 3, note: 'omitted after companion cap' },
+});
+check(
+  'layout draws a +N more overflow card',
+  overflowGeom.nodes.some((n) => n.id === '__overflow' && n.label === '+3 more'),
+  overflowGeom.nodes.map((n) => n.label).join(', '),
+);
+
 console.log(`\n${failures === 0 ? 'PASS' : 'FAIL'} — ${failures} failing check(s).`);
 process.exit(failures === 0 ? 0 : 1);

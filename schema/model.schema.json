@@ -28,6 +28,16 @@
       "properties": {
         "companions": { "type": "integer", "minimum": 1, "default": 8 }
       }
+    },
+    "overflow": {
+      "type": "object",
+      "description": "Companions omitted after the cap. Keep companions.length <= caps.companions and report the rest here.",
+      "required": ["count"],
+      "additionalProperties": false,
+      "properties": {
+        "count": { "type": "integer", "minimum": 1 },
+        "note": { "type": "string", "minLength": 1 }
+      }
     }
   },
   "$defs": {

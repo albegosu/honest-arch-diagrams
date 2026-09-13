@@ -1,7 +1,6 @@
 # honest-arch-diagrams
 
 [![CI](https://github.com/albegosu/honest-arch-diagrams/actions/workflows/ci.yml/badge.svg)](https://github.com/albegosu/honest-arch-diagrams/actions/workflows/ci.yml)
-[![skills.sh](https://skills.sh/b/albegosu/honest-arch-diagrams)](https://skills.sh/albegosu/honest-arch-diagrams)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 An [Agent Skill](https://agentskills.io) for drawing **honest service-topology and
@@ -26,13 +25,7 @@ GitHub Copilot CLI, OpenCode.
 
 ## Install
 
-From the marketplace:
-
-```bash
-npx skills add albegosu/honest-arch-diagrams
-```
-
-Or copy the skill directly into your agent's skills directory:
+Clone and copy the skill into your agent's skills directory:
 
 ```bash
 git clone https://github.com/albegosu/honest-arch-diagrams
@@ -43,6 +36,8 @@ cp -r honest-arch-diagrams/skills/honest-arch-diagrams .github/skills/   # GitHu
 
 In Cursor you can also add it as a Remote Rule pointing at
 `https://github.com/albegosu/honest-arch-diagrams`.
+
+Marketplace listing (skills.sh / agentskills.io) is planned for v0.7.
 
 ## Use it
 
@@ -61,7 +56,9 @@ d2 examples/checkout-service.d2 checkout-service.svg
 
 ## Example
 
-`examples/checkout-service.model.json` → `examples/checkout-service.d2`. Blue marks the
+`examples/checkout-service.model.json` is the source of truth. The hand-authored
+`examples/checkout-service.d2` (and its `.svg` / `.png`) is an **illustrative** D2 render of
+that model; prefer `scripts/layout.mjs` when you need the grammar exactly. Blue marks the
 verified path; Postgres and Redis are `linked` companions (dashed, with the evidence in the
 edge label); Prometheus is an `around` companion ("also in this release," no connector).
 
@@ -175,7 +172,9 @@ Full detail in [`skills/honest-arch-diagrams/references/honesty-rules.md`](skill
 ## Documentation
 
 - [`DEFINITION.md`](DEFINITION.md) — objective, scope, differentiator.
-- [`ROADMAP.md`](ROADMAP.md) — where it goes next and how to contribute.
+- [`ROADMAP.md`](ROADMAP.md) — where it goes next.
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to run tests and add an adapter.
+- [`CHANGELOG.md`](CHANGELOG.md) — version history.
 - [`skills/honest-arch-diagrams/SKILL.md`](skills/honest-arch-diagrams/SKILL.md) — the skill entry point.
 - [`adapters/k8s/from-k8s.mjs`](adapters/k8s/from-k8s.mjs) — derive a model from a Kubernetes JSON dump.
 - [`adapters/terraform/from-terraform.mjs`](adapters/terraform/from-terraform.mjs) — derive from `terraform show -json`.

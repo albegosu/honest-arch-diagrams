@@ -111,10 +111,11 @@ export function fromTerraform(input, opts = {}) {
   // --- companions: datastores/cloud/auth resources ---
   const cap = opts.cap ?? 8;
   const companions = [];
+  let omitted = 0;
   for (const r of resources) {
-    if (companions.length >= cap) break;
     const kind = COMPANION_TYPES[r.type];
     if (!kind || usedForSpine.has(r.address)) continue;
+    if (companions.length >= cap) { omitted += 1; continue; }
     // Honesty: linked only when the app resource explicitly references this datastore.
     const linked = Boolean(anchorId) && referencesAddress(r.address);
     companions.push(
@@ -124,11 +125,13 @@ export function fromTerraform(input, opts = {}) {
     );
   }
 
-  return {
+  const model = {
     app: opts.app || resources.find((r) => HOP_TYPES[r.type] === 'service')?.name || 'stack',
     hops, edges, companions,
     caps: { companions: cap },
   };
+  if (omitted > 0) model.overflow = { count: omitted, note: 'omitted after companion cap' };
+  return model;
 }
 
 function main() {

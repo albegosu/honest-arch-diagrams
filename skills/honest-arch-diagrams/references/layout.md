@@ -1,36 +1,47 @@
 # Layout and edge routing
 
 Geometry rules that make the sketch readable. A renderer with its own layout engine (D2,
-ELK) can delegate most of this; the values below are for hand-built SVG or for tuning.
+ELK) can delegate most of this; the values below match the bundled reference layout.
+
+> Source of truth: [`scripts/layout.mjs`](../../../scripts/layout.mjs). Keep this doc in
+> sync with that file.
 
 ## Ranking (columns)
 
-- Assign each hop a **rank** by lane order: Edge(0) → Gateway(1) → Identity(2) → App(3) →
-  Workload(4). Nodes of the same rank stack on Y instead of taking a new column.
+- Assign each hop a **rank by kind** (not by lane). Same-rank hops stack on Y:
+  - `dns` → 0
+  - `lb`, `tls` → 1
+  - `ingress`, `httproute` → 2
+  - `oauth2_proxy` → 3
+  - `service` → 4
+  - `endpoints`, `pod` → 5
 - Compact columns by rank so a missing optional hop (no TLS, no auth) leaves **no hole**:
   ranks that are empty are skipped, not reserved.
-- Center each column's stack on the baseline: `y = baseline + (i - (n-1)/2) * gap`.
+- Center each column's stack on the baseline.
 
-Reference constants (px), tune per canvas:
+Reference constants (px) from `scripts/layout.mjs`:
 
 ```
-NODE_W 132   NODE_H 56
-H_GAP 100    V_GAP 92
-START_X 80   BASE_Y 220
+NODE_W 148   NODE_H 56
+H_GAP 96     START_X 90   BASE_Y 240
 SPINE_STACK_GAP 48
+ROW_GAP 72   COMPANION_STACK_GAP 22
+CORNER_R 8
 ```
 
 ## Companion placement
 
-- One supporting row **below** the spine: `rowY = pathBottom + ROW_GAP` (ROW_GAP ~64).
-- Column by kind: auth under the Identity/Gateway column, datastores under the Workload
-  column (Data lane), the rest under App.
-- Stack companions in their column with a tight gap (~20px). Cluster like kinds together
-  (all datastores, then auth, then rest).
+- One supporting row **below** the spine: `rowY = pathBottom + ROW_GAP`.
+- Column by kind: auth under the Identity/Gateway column, datastores/`cloud` under the
+  Workload column (Data band; falls back to App when no Workload hop exists), the rest under
+  App.
+- Stack companions in their column with `COMPANION_STACK_GAP`.
+- When `model.overflow.count >= 1`, draw a dashed `+N more` card in the "Also in this
+  release" band (no connector).
 
 ## Orthogonal elbows
 
-- Route spine edges as orthogonal elbows on a **4px grid** with rounded corners `r=8`.
+- Route spine edges as orthogonal elbows with rounded corners `r=CORNER_R`.
 - Prefer a straight horizontal run when source and target share a Y; otherwise one vertical
   segment plus horizontal runs (an "elbow"), never a diagonal.
 

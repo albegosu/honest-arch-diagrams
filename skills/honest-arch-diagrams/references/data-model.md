@@ -29,7 +29,8 @@ or a hand-built SVG.
       "anchor": "svc"           // linked only: spine node id the dashed edge attaches to
     }
   ],
-  "caps": { "companions": 8 }
+  "caps": { "companions": 8 },
+  "overflow": { "count": 2, "note": "omitted after companion cap" }  // optional
 }
 ```
 
@@ -43,17 +44,30 @@ or a hand-built SVG.
   release/owner ("same Argo app `checkout`"); for `linked` it is the concrete reference
   ("env `REDIS_HOST`", "secret `DATABASE_URL`", "configmap host").
 - **`edges[].path: true`** marks accented/arterial edges. Companion edges are never `path`.
+- **`overflow`** (optional) reports companions omitted after the cap:
+  `{ "count": 5, "note": "omitted after companion cap" }`. Keep
+  `companions.length <= caps.companions` and put the surplus in `overflow.count`. The layout
+  draws a `+N more` card for it.
 
 ## Kinds → lane defaults
 
+**Hop kinds** (spine only):
+
 | kind | default lane |
 |---|---|
-| `dns`, `lb`, `tls`, `cloud` | Edge |
+| `dns`, `lb`, `tls` | Edge |
 | `ingress`, `httproute` | Gateway |
-| `oauth2_proxy`, `auth` | Identity |
-| `service`, `controller` | App |
+| `oauth2_proxy` | Identity |
+| `service` | App |
 | `endpoints`, `pod` | Workload |
-| `db` | Data |
+
+**Companion kinds** (supporting row; never on the spine):
+
+| kind | default band |
+|---|---|
+| `db`, `cloud` | Data (under Workload, or under App when no Workload) |
+| `auth` | Identity |
+| `controller`, `service` | App |
 
 ## Validation (pre-render)
 
@@ -63,7 +77,7 @@ Reject the model if any of these are true:
 2. A `companion` has no `relation` or no `evidence`.
 3. A `companion` id also appears as a `hop` id (duplicate truth — subsume it).
 4. An `around` companion has an `anchor` or an edge.
-5. `companions.length > caps.companions` and no summary node is present.
+5. `companions.length > caps.companions` (trim to the cap and set `overflow` instead).
 6. Any edge with `path: true` touches a companion id.
 
 These are enforced by `scripts/lint.mjs`; the structural shape is in

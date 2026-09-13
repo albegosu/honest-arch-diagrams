@@ -1,12 +1,10 @@
 ---
 name: honest-arch-diagrams
 description: >-
-  Draw honest service-topology and request-path architecture diagrams. Use when asked to
-  diagram how a request flows through a service (edge, gateway, auth, app, workload, data),
-  map a service and its dependencies, or turn code, manifests, or telemetry into an
-  architecture sketch. Separates the VERIFIED request path from INFERRED companions, never
-  invents components, and renders with a consistent lane grammar to D2, SVG, or Mermaid.
-  Not for C4 documentation, diagram theming, or file-level inventories.
+  Draw honest service-topology and request-path diagrams. Use when mapping how a request
+  reaches a service, or turning manifests/traces into an architecture sketch. Separates the
+  verified path from inferred companions; never invents components. Not for C4, theming, or
+  file inventories.
 ---
 
 # Honest architecture diagrams
@@ -48,8 +46,9 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 2. **Build the model.** Fill `{ hops[], edges[], companions[] }` per
    `references/data-model.md`. Stamp each element with `evidence` and, for companions,
    `relation` (`linked` = evidence-backed edge; `around` = co-located by release/owner).
-3. **Apply the honesty rules.** Drop any element that fails them. Cap companions (default 8).
-   Save the model as `<app>.model.json` and validate it before rendering:
+3. **Apply the honesty rules.** Drop any element that fails them. Cap companions (default 8);
+   put the surplus in `overflow: { count, note }` instead of padding the canvas. Save the
+   model as `<app>.model.json` and validate it before rendering:
    `node scripts/lint.mjs <app>.model.json`. Fix every reported violation.
 4. **Lay out.** Assign lanes (Edge / Gateway / Identity / App / Workload / Data) and route
    edges per `references/visual-grammar.md` and `references/layout.md`.
@@ -66,7 +65,7 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
       "also in this release," not "called by."
 - [ ] No companion sits on the request path or in the arterial/accented edges.
 - [ ] No TLS/auth/datastore hop was invented from a name guess.
-- [ ] Companion count is within the cap; extras are summarized, not faked.
+- [ ] Companion count is within the cap; extras are in `overflow` (`+N more`), not faked.
 - [ ] If rendered with motion, it respects `prefers-reduced-motion`.
 
 ## References
@@ -83,4 +82,5 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 
 ## Example
 
-`examples/checkout-service.model.json` → `examples/checkout-service.d2`.
+`examples/checkout-service.model.json` → `examples/checkout-service.d2` (illustrative D2;
+prefer `scripts/layout.mjs` for the grammar-exact SVG).

@@ -1,6 +1,6 @@
 {
   "name": "honest-arch-diagrams",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Agent skill: honest service-topology / request-path diagrams. Verified path vs inferred companions, never hallucinate components.",
   "license": "MIT",
   "type": "module",

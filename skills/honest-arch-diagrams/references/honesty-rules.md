@@ -52,9 +52,18 @@ One truth per component.
 
 ## 7. Cap and summarize, never pad
 
-Companions are capped (default 8). When there are more, keep the evidence-backed ones and
-summarize the rest ("+5 more in this release"). Never invent filler to balance the picture,
-and never drop an evidence-backed companion to make room for a guessed one.
+Companions are capped (default 8). Keep evidence-backed companions first and put the rest
+in `overflow`:
+
+```jsonc
+"overflow": { "count": 5, "note": "omitted after companion cap" }
+```
+
+Adapters truncate to the cap and set `overflow.count` to the number omitted. The layout
+draws a dashed `+N more` card in the "Also in this release" band. Never invent filler to
+balance the picture, and never drop an evidence-backed companion to make room for a guessed
+one. A model with `companions.length > caps.companions` fails the linter — trim first, then
+report overflow.
 
 ## 8. Accent and motion are not claims
 
@@ -71,4 +80,4 @@ not traffic and not health. Never accent a companion edge. Any motion must degra
 | oauth companion + oauth hop both drawn | Rule 6 | Keep the hop only |
 | Companion edge animated | Rule 8 | Motion on path edges only |
 | Secret value in a tooltip | Rule 5 | Show the Secret name only |
-| 12 evenly spaced generic services | Rule 7 | Cap to 8, summarize the rest |
+| 12 evenly spaced generic services | Rule 7 | Cap to 8, set `overflow.count` |

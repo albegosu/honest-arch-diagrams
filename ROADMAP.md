@@ -48,7 +48,7 @@ around them, never at their expense.
   path, linked without anchor, companion duplicating a hop).
 - Second, distinct example (`payments-api`: HTTPRoute, no auth, cloud + db companions) plus an
   HTTPRoute adapter test, broadening grammar coverage.
-- skills.sh install badge in the README.
+- skills.sh install badge deferred to v0.7 (listing not published yet).
 
 ## v0.6 — More adapters ✅
 - `adapters/terraform` ✅: `terraform show -json` (state or plan) → model. Edge/gateway/app
@@ -61,13 +61,21 @@ around them, never at their expense.
 - Golden tests assert the terraform around/linked split and that openapi invents no
   companions beyond `x-depends-on`.
 
+## v0.6.1 — Pre-launch hardening ✅
+- Honest install path: README no longer points at a skills.sh page that 404s; clone/copy is
+  primary until marketplace listing lands in v0.7.
+- Real companion overflow: optional `overflow: { count, note? }` in the schema; adapters
+  trim to the cap and report omitted count; layout draws a `+N more` card.
+- Docs aligned with the layout engine (kind ranking, real constants, `cloud` → Data).
+- OSS hygiene: `CONTRIBUTING.md`, `CHANGELOG.md`, GitHub issue/PR templates.
+- SKILL frontmatter shortened; D2 example marked illustrative.
+
 ## v0.7 — Distribution polish
 - Submit to skills.sh and list on agentskills.io; install-count badge.
 - `.claude-plugin/marketplace.json` for the Claude Code `/plugin` flow.
 - Optional YAML input for the OpenAPI adapter.
 
 ## How to contribute
-- New lane kinds or evidence sources are welcome as long as they keep the
-  observed-vs-inferred split explicit.
-- Open an issue describing the evidence you have and the honesty question it raises before
-  adding a renderer feature.
+See [`CONTRIBUTING.md`](CONTRIBUTING.md). New lane kinds or evidence sources are welcome as
+long as they keep the observed-vs-inferred split explicit. Open an issue describing the
+evidence you have and the honesty question it raises before adding a renderer feature.

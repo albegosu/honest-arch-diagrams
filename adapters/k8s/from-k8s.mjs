@@ -126,8 +126,10 @@ export function fromK8s(input, opts = {}) {
   const cap = opts.cap ?? 8;
   const companions = [];
   const seen = new Set();
+  let omitted = 0;
   const addLinked = (id, label, kind, evidence) => {
-    if (!anchorId || seen.has(id) || companions.length >= cap) return;
+    if (!anchorId || seen.has(id)) return;
+    if (companions.length >= cap) { omitted += 1; return; }
     seen.add(id);
     companions.push({ id, kind, label, relation: 'linked', evidence, subtitle: 'uses', anchor: anchorId });
   };
@@ -149,22 +151,25 @@ export function fromK8s(input, opts = {}) {
 
   // around: other workloads co-located in the namespace, no connector.
   for (const d of deployments) {
-    if (d === appDeploy || companions.length >= cap) continue;
+    if (d === appDeploy) continue;
     const name = d.metadata.name;
     const id = slug(name);
     if (seen.has(id)) continue;
     seen.add(id);
+    if (companions.length >= cap) { omitted += 1; continue; }
     companions.push({
       id, kind: kindOfName(name), label: labelFor(name),
       relation: 'around', evidence: `namespace ${d.metadata.namespace ?? 'default'}`, subtitle: 'release',
     });
   }
 
-  return {
+  const model = {
     app: opts.app || svcName || 'app',
     hops, edges, companions,
     caps: { companions: cap },
   };
+  if (omitted > 0) model.overflow = { count: omitted, note: 'omitted after companion cap' };
+  return model;
 }
 
 function main() {

@@ -7,7 +7,9 @@ apply honesty *styling* on top of its geometry. Mermaid and hand-built SVG are f
 > D2 install, use the bundled reference layout instead:
 > `node scripts/layout.mjs <app>.model.json --svg <app>.svg`. It computes lanes, columns,
 > orthogonal elbows, and a self-contained SVG from the same model. D2 remains the default for
-> quick, themeable output.
+> quick, themeable output. The checked-in `examples/checkout-service.d2` (and its `.svg` /
+> `.png`) is a **hand-authored illustration** of that model; the model JSON + `layout.mjs`
+> are the source of truth.
 
 ## Why D2 first
 

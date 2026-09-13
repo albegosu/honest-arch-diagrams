@@ -140,6 +140,16 @@ export function layout(model) {
     });
     ay += NODE_H + COMPANION_STACK_GAP;
   }
+  // Overflow card: companions omitted after the cap (honesty rule 7).
+  if (model.overflow?.count >= 1) {
+    const n = model.overflow.count;
+    nodes.set('__overflow', {
+      id: '__overflow', kind: 'service', label: `+${n} more`,
+      band: 'Also in this release',
+      satellite: true, relation: 'around', subtitle: 'release', overflow: true,
+      x: START_X, y: ay, w: NODE_W, h: NODE_H,
+    });
+  }
 
   // --- 3. edges ---
   const pathVerticals = []; // {x, y0, y1} for hop-arc crossing detection

@@ -66,13 +66,14 @@ export function fromOpenApi(doc, opts = {}) {
   const deps = doc['x-depends-on'] ?? doc.info?.['x-depends-on'] ?? [];
   const companions = [];
   const seen = new Set();
+  let omitted = 0;
   for (const d of deps) {
-    if (companions.length >= cap) break;
     const name = typeof d === 'string' ? d : d?.name;
     if (!name) continue;
     const id = slug(name);
     if (seen.has(id)) continue;
     seen.add(id);
+    if (companions.length >= cap) { omitted += 1; continue; }
     const kind = COMPANION_KINDS.has(d?.kind) ? d.kind : 'service';
     companions.push({
       id, kind, label: name, relation: 'linked',
@@ -81,7 +82,9 @@ export function fromOpenApi(doc, opts = {}) {
     });
   }
 
-  return { app: title, hops, edges, companions, caps: { companions: cap } };
+  const model = { app: title, hops, edges, companions, caps: { companions: cap } };
+  if (omitted > 0) model.overflow = { count: omitted, note: 'omitted after companion cap' };
+  return model;
 }
 
 function main() {
