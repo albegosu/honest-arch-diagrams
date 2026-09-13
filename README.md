@@ -63,6 +63,20 @@ edge label); Prometheus is an `around` companion ("also in this release," no con
 
 ![Honest request-path diagram for the checkout service](examples/checkout-service.png)
 
+## Reference layout (no D2 dependency)
+
+D2 auto-layout does not guarantee the lane grammar; it can float datastores anywhere. The
+bundled layout engine places the spine in ranked columns and drops companions onto one
+supporting row under their lane, so **Data sits directly under Workload** and edges route as
+orthogonal elbows with a hop-arc over crossings. It emits geometry as JSON and a
+self-contained SVG (Node 18+, no dependencies):
+
+```bash
+node scripts/layout.mjs examples/checkout-service.model.json --svg checkout-service.svg
+```
+
+![Grammar-exact layout: Postgres and Redis in the Data band under Workload](examples/checkout-service.layout.png)
+
 ## Validate
 
 Every model is checked against the honesty rules before rendering. The linter is

@@ -3,6 +3,12 @@
 D2 is the default target: it does orthogonal routing and lane containers for you, so you
 apply honesty *styling* on top of its geometry. Mermaid and hand-built SVG are fallbacks.
 
+> When you need the grammar exactly (Data under Workload, hop-arc over crossings) without a
+> D2 install, use the bundled reference layout instead:
+> `node scripts/layout.mjs <app>.model.json --svg <app>.svg`. It computes lanes, columns,
+> orthogonal elbows, and a self-contained SVG from the same model. D2 remains the default for
+> quick, themeable output.
+
 ## Why D2 first
 
 - `direction: right` gives the left-to-right request flow.

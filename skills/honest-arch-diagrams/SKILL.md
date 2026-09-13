@@ -46,8 +46,10 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
    `node scripts/lint.mjs <app>.model.json`. Fix every reported violation.
 4. **Lay out.** Assign lanes (Edge / Gateway / Identity / App / Workload / Data) and route
    edges per `references/visual-grammar.md` and `references/layout.md`.
-5. **Render.** Emit D2 first (`references/rendering-d2.md`); Mermaid or hand-built SVG as
-   fallback. Accent only the verified path.
+5. **Render.** Either run the bundled reference layout
+   (`node scripts/layout.mjs <app>.model.json --svg <app>.svg`), which enforces the lane
+   grammar and keeps Data under Workload, or emit D2 (`references/rendering-d2.md`); Mermaid
+   or hand-built SVG as fallback. Accent only the verified path.
 6. **Self-check.** Run the checklist below before presenting.
 
 ## Self-check (must all pass)
@@ -67,6 +69,7 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 - `references/visual-grammar.md` — lanes, stacking, accent, satellites.
 - `references/layout.md` — ranking, orthogonal elbows, the hop-arc.
 - `references/rendering-d2.md` — D2 output patterns (+ Mermaid/SVG notes).
+- `scripts/layout.mjs` — reference lane packer + elbow router; emits geometry JSON and SVG.
 
 ## Example
 

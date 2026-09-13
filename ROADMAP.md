@@ -19,10 +19,14 @@ around them, never at their expense.
 - `SKILL.md` instructs the agent to run the linter before rendering.
 - `package.json` exposes `npm run lint` and a `honest-arch-lint` bin.
 
-## v0.3 — Reference layout
-- `scripts/layout.mjs`: lane packer (rank by lane, stack same-rank) + orthogonal elbow
+## v0.3 — Reference layout ✅
+- `scripts/layout.mjs`: lane packer (rank by hop kind, stack same-rank) + orthogonal elbow
   router with the hop-arc over crossings.
-- Emits positioned nodes so renderers other than D2 can reuse the geometry.
+- Companions land on one supporting row under their lane, so datastores sit in the **Data**
+  band directly under **Workload** — the placement D2 auto-layout does not guarantee.
+- Emits positioned nodes/edges/bands as JSON and a self-contained SVG, so any renderer can
+  reuse the geometry without a D2 dependency.
+- `npm run layout` regenerates `examples/checkout-service.layout.svg`.
 
 ## v0.4 — Evidence adapters (opt-in)
 - `adapters/k8s`: hostname → Ingress/HTTPRoute → Service → Endpoints/Pod, plus companions

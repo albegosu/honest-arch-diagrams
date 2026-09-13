@@ -1,6 +1,6 @@
 {
   "name": "honest-arch-diagrams",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Agent skill: honest service-topology / request-path diagrams. Verified path vs inferred companions, never hallucinate components.",
   "license": "MIT",
   "type": "module",
@@ -9,6 +9,7 @@
   },
   "scripts": {
     "lint": "node scripts/lint.mjs",
+    "layout": "node scripts/layout.mjs examples/checkout-service.model.json --svg examples/checkout-service.layout.svg",
     "render": "d2 examples/checkout-service.d2 examples/checkout-service.svg"
   },
   "keywords": [
