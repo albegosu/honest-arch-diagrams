@@ -1,0 +1,35 @@
+openapi: "3.0.3"
+info:
+  title: Orders API
+  version: "1.4.2"
+servers:
+  - url: https://orders.example.com/v1
+security:
+  - oauth2:
+      - orders:read
+      - orders:write
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.example.com/authorize
+          tokenUrl: https://auth.example.com/token
+          scopes:
+            "orders:read": read
+            "orders:write": write
+x-depends-on:
+  - name: Payments API
+    kind: service
+    evidence: POST /charge
+  - name: Postgres
+    kind: db
+    evidence: orders datastore
+paths:
+  /orders:
+    get:
+      summary: List orders
+      responses:
+        "200":
+          description: ok

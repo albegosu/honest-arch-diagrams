@@ -9,6 +9,8 @@
 //     ConfigMap *values* are never read or emitted.
 //   - Hostnames extracted from env values are stripped of any user:pass credentials.
 //   - Nothing is invented: a hop appears only if its resource is present in the input.
+//   - When `--app` is set, gateway/service/workload selection is scoped to that app so a
+//     multi-service dump cannot become a multi-spine diagram.
 //
 // Usage:
 //   node adapters/k8s/from-k8s.mjs <dump.json> [--app <name>] [--out <model.json>]
@@ -60,24 +62,70 @@ function loadItems(input) {
   return [input];
 }
 
+/** True if a resource name is the app or clearly belongs to it (prefix/contains). */
+export function nameMatchesApp(name, app) {
+  if (!app) return true;
+  if (!name) return false;
+  const n = String(name).toLowerCase();
+  const a = String(app).toLowerCase();
+  return n === a || n.startsWith(`${a}-`) || n.endsWith(`-${a}`) || n.includes(`-${a}-`) || n.includes(a);
+}
+
+function ingressBackendName(ing) {
+  return ing?.spec?.rules?.[0]?.http?.paths?.[0]?.backend?.service?.name;
+}
+
+function httpRouteBackendName(hr) {
+  return hr?.spec?.rules?.[0]?.backendRefs?.[0]?.name;
+}
+
+function pickForApp(list, app, scoreFn) {
+  if (!list.length) return undefined;
+  if (!app) return list[0];
+  const scored = list
+    .map((item) => ({ item, score: scoreFn(item) }))
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score);
+  return scored[0]?.item;
+}
+
 export function fromK8s(input, opts = {}) {
   const items = loadItems(input);
+  const app = opts.app;
   const byKind = (k) => items.filter((i) => i?.kind === k);
   const ingresses = byKind('Ingress');
   const httproutes = byKind('HTTPRoute');
   const services = byKind('Service');
   const endpointsList = byKind('Endpoints');
   const deployments = byKind('Deployment');
+  const securityPolicies = byKind('SecurityPolicy');
 
   const hops = [];
-  let svcName = opts.app;
+  let svcName = app;
 
-  // --- gateway: Ingress preferred, HTTPRoute as fallback ---
-  const ing = ingresses[0];
-  if (ing) {
+  // Prefer HTTPRoute when it matches the app; otherwise Ingress.
+  const hr = pickForApp(httproutes, app, (r) => {
+    let s = 0;
+    if (nameMatchesApp(r.metadata?.name, app)) s += 2;
+    if (nameMatchesApp(httpRouteBackendName(r), app)) s += 3;
+    return s;
+  });
+  const ing = pickForApp(ingresses, app, (i) => {
+    let s = 0;
+    if (nameMatchesApp(i.metadata?.name, app)) s += 2;
+    if (nameMatchesApp(ingressBackendName(i), app)) s += 3;
+    return s;
+  });
+
+  if (hr) {
+    const host = hr.spec?.hostnames?.[0];
+    svcName = svcName || httpRouteBackendName(hr);
+    if (host) hops.push({ id: 'dns', kind: 'dns', label: host, lane: 'Edge', evidence: `HTTPRoute ${hr.metadata.name} hostname` });
+    hops.push({ id: 'httproute', kind: 'httproute', label: 'HTTPRoute', lane: 'Gateway', evidence: `HTTPRoute ${hr.metadata.name}` });
+  } else if (ing) {
     const rule = ing.spec?.rules?.[0];
     const host = rule?.host;
-    svcName = svcName || rule?.http?.paths?.[0]?.backend?.service?.name;
+    svcName = svcName || ingressBackendName(ing);
     if (host) hops.push({ id: 'dns', kind: 'dns', label: host, lane: 'Edge', evidence: `Ingress ${ing.metadata.name} host` });
     const tls = ing.spec?.tls?.[0];
     if (tls?.secretName) hops.push({ id: 'tls', kind: 'tls', label: 'TLS termination', lane: 'Edge', evidence: `Ingress TLS secret ${tls.secretName}` });
@@ -85,16 +133,31 @@ export function fromK8s(input, opts = {}) {
     if (ing.metadata?.annotations?.['nginx.ingress.kubernetes.io/auth-url']) {
       hops.push({ id: 'oauth', kind: 'oauth2_proxy', label: 'oauth2-proxy', lane: 'Identity', evidence: `Ingress ${ing.metadata.name} auth-url annotation` });
     }
-  } else if (httproutes[0]) {
-    const hr = httproutes[0];
-    const host = hr.spec?.hostnames?.[0];
-    svcName = svcName || hr.spec?.rules?.[0]?.backendRefs?.[0]?.name;
-    if (host) hops.push({ id: 'dns', kind: 'dns', label: host, lane: 'Edge', evidence: `HTTPRoute ${hr.metadata.name} hostname` });
-    hops.push({ id: 'httproute', kind: 'httproute', label: 'HTTPRoute', lane: 'Gateway', evidence: `HTTPRoute ${hr.metadata.name}` });
   }
 
-  // --- app service ---
-  const svc = services.find((s) => s.metadata?.name === svcName) || services[0];
+  // Gateway API SecurityPolicy extAuth → Identity hop (declared evidence)
+  if (!hops.some((h) => h.id === 'oauth')) {
+    const pol = pickForApp(securityPolicies, app, (p) => {
+      let s = 0;
+      if (nameMatchesApp(p.metadata?.name, app)) s += 2;
+      const target = p.spec?.targetRef?.name;
+      if (nameMatchesApp(target, app)) s += 3;
+      return s;
+    });
+    const backend = pol?.spec?.extAuth?.http?.backendRefs?.[0]?.name
+      ?? pol?.spec?.extAuth?.backendRefs?.[0]?.name;
+    if (backend) {
+      hops.push({
+        id: 'oauth', kind: 'oauth2_proxy', label: 'oauth2-proxy', lane: 'Identity',
+        evidence: `SecurityPolicy ${pol.metadata.name} extAuth ${backend}`,
+      });
+    }
+  }
+
+  // --- app service (strict when --app) ---
+  const svc = pickForApp(services, app, (s) => (nameMatchesApp(s.metadata?.name, app) ? 3 : 0))
+    || (!app ? services[0] : undefined)
+    || services.find((s) => s.metadata?.name === svcName);
   if (svc) {
     svcName = svc.metadata.name;
     hops.push({ id: 'svc', kind: 'service', label: svcName, lane: 'App', evidence: `Service ${svcName}` });
@@ -109,6 +172,7 @@ export function fromK8s(input, opts = {}) {
   // --- workload (Deployment behind the service) ---
   const appDeploy =
     deployments.find((d) => selectorMatches(d.spec?.selector?.matchLabels, svc?.spec?.selector)) ||
+    pickForApp(deployments, app, (d) => (nameMatchesApp(d.metadata?.name, app) ? 3 : 0)) ||
     deployments.find((d) => d.metadata?.name === svcName);
   if (appDeploy) {
     hops.push({ id: 'pod', kind: 'pod', label: `${appDeploy.metadata.name} pod`, lane: 'Workload', evidence: `Deployment ${appDeploy.metadata.name}` });
@@ -120,7 +184,7 @@ export function fromK8s(input, opts = {}) {
   const edges = [];
   for (let i = 0; i < present.length - 1; i++) edges.push({ from: present[i], to: present[i + 1], path: true });
 
-  const anchorId = ['svc', 'pod', 'endpoints', 'ingress'].find((id) => present.includes(id)) ?? present.at(-1);
+  const anchorId = ['svc', 'pod', 'endpoints', 'ingress', 'httproute'].find((id) => present.includes(id)) ?? present.at(-1);
 
   // --- companions ---
   const cap = opts.cap ?? 8;
@@ -140,6 +204,8 @@ export function fromK8s(input, opts = {}) {
       if (ref) {
         addLinked(slug(ref), labelFor(ref), kindOfName(`${ref} ${e.name}`), `secret ${ref}`);
       } else if (looksLikeHost(e.value) || /_(HOST|URL|URI|ADDR|ENDPOINT)$/.test(e.name ?? '')) {
+        // Skip version pins mistaken for hosts (e.g. APP_VERSION=abc123)
+        if (/_VERSION$/i.test(e.name ?? '')) continue;
         addLinked(slug(e.name), labelFor(e.name), kindOfName(e.name), `env ${e.name}`);
       }
     }
@@ -153,6 +219,8 @@ export function fromK8s(input, opts = {}) {
   for (const d of deployments) {
     if (d === appDeploy) continue;
     const name = d.metadata.name;
+    // When --app is set, skip other app deployments that match a different service name pattern
+    // still include them as around (co-located) — that is honest. Keep as around.
     const id = slug(name);
     if (seen.has(id)) continue;
     seen.add(id);
