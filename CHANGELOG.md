@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- LICENSE copyright holder set to Alberto Gonzalez (was a placeholder).
+
+### Changed
+- README restructured: 60-second path, adapter strength table, default render = layout SVG.
+- CONTRIBUTING expanded (setup, Conventional Commits, release version bump checklist).
+- Added SECURITY.md, CODE_OF_CONDUCT.md, and issue template contact links.
+
 ## [0.9.0] — 2026-09-13
 
 ### Added

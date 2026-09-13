@@ -3,6 +3,9 @@
   "version": "0.9.0",
   "description": "Agent skill: honest service-topology / request-path diagrams. Verified path vs inferred companions, never hallucinate components.",
   "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
   "type": "module",
   "bin": {
     "honest-arch-lint": "skills/honest-arch-diagrams/scripts/lint.mjs",
