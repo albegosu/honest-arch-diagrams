@@ -1,16 +1,18 @@
 {
   "name": "honest-arch-diagrams",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Agent skill: honest service-topology / request-path diagrams. Verified path vs inferred companions, never hallucinate components.",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "honest-arch-lint": "skills/honest-arch-diagrams/scripts/lint.mjs"
+    "honest-arch-lint": "skills/honest-arch-diagrams/scripts/lint.mjs",
+    "honest-arch": "skills/honest-arch-diagrams/scripts/cli.mjs"
   },
   "scripts": {
     "lint": "node skills/honest-arch-diagrams/scripts/lint.mjs",
     "schema": "node skills/honest-arch-diagrams/scripts/schema.mjs",
     "test": "node skills/honest-arch-diagrams/scripts/test.mjs",
+    "cli": "node skills/honest-arch-diagrams/scripts/cli.mjs",
     "layout": "node skills/honest-arch-diagrams/scripts/layout.mjs examples/checkout-service.model.json --svg examples/checkout-service.layout.svg",
     "to-d2": "node skills/honest-arch-diagrams/scripts/to-d2.mjs examples/checkout-service.model.json --out examples/checkout-service.generated.d2",
     "from-k8s": "node skills/honest-arch-diagrams/adapters/k8s/from-k8s.mjs skills/honest-arch-diagrams/adapters/k8s/fixtures/checkout.k8s.json",
@@ -18,6 +20,7 @@
     "from-terraform": "node skills/honest-arch-diagrams/adapters/terraform/from-terraform.mjs skills/honest-arch-diagrams/adapters/terraform/fixtures/orders-edge.tfshow.json",
     "from-openapi": "node skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs skills/honest-arch-diagrams/adapters/openapi/fixtures/orders.openapi.json",
     "from-openapi-yaml": "node skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs skills/honest-arch-diagrams/adapters/openapi/fixtures/orders.openapi.yaml",
+    "from-trace": "node skills/honest-arch-diagrams/adapters/trace/from-trace.mjs skills/honest-arch-diagrams/adapters/trace/fixtures/checkout.trace.json --app checkout",
     "render": "d2 examples/checkout-service.d2 examples/checkout-service.svg"
   },
   "keywords": [
@@ -28,6 +31,7 @@
     "kubernetes",
     "terraform",
     "openapi",
+    "opentelemetry",
     "gitops",
     "helm",
     "d2",

@@ -1,0 +1,67 @@
+{
+  "app": "checkout",
+  "spans": [
+    {
+      "name": "GET /checkout",
+      "kind": "SERVER",
+      "service": "checkout",
+      "attributes": {
+        "http.host": "checkout.example.com",
+        "http.scheme": "https",
+        "http.route": "/checkout"
+      },
+      "resource": {
+        "service.name": "checkout",
+        "k8s.namespace.name": "checkout"
+      }
+    },
+    {
+      "name": "SELECT orders",
+      "kind": "CLIENT",
+      "service": "checkout",
+      "attributes": {
+        "db.system": "postgresql",
+        "peer.service": "postgres"
+      },
+      "resource": {
+        "service.name": "checkout",
+        "k8s.namespace.name": "checkout"
+      }
+    },
+    {
+      "name": "GET",
+      "kind": "CLIENT",
+      "service": "checkout",
+      "attributes": {
+        "peer.service": "redis",
+        "db.system": "redis"
+      },
+      "resource": {
+        "service.name": "checkout",
+        "k8s.namespace.name": "checkout"
+      }
+    },
+    {
+      "name": "scrape",
+      "kind": "SERVER",
+      "service": "prometheus",
+      "attributes": {},
+      "resource": {
+        "service.name": "prometheus",
+        "k8s.namespace.name": "checkout"
+      }
+    },
+    {
+      "name": "GET /other",
+      "kind": "SERVER",
+      "service": "payments",
+      "attributes": {
+        "http.host": "payments.example.com"
+      },
+      "resource": {
+        "service.name": "payments",
+        "k8s.namespace.name": "payments"
+      }
+    }
+  ]
+}

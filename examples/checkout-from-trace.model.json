@@ -1,0 +1,69 @@
+{
+  "app": "checkout",
+  "hops": [
+    {
+      "id": "dns",
+      "kind": "dns",
+      "label": "checkout.example.com",
+      "lane": "Edge",
+      "evidence": "trace span GET /checkout http.host"
+    },
+    {
+      "id": "tls",
+      "kind": "tls",
+      "label": "TLS termination",
+      "lane": "Edge",
+      "evidence": "trace span GET /checkout https"
+    },
+    {
+      "id": "svc",
+      "kind": "service",
+      "label": "checkout",
+      "lane": "App",
+      "evidence": "trace service.name checkout"
+    }
+  ],
+  "edges": [
+    {
+      "from": "dns",
+      "to": "tls",
+      "path": true
+    },
+    {
+      "from": "tls",
+      "to": "svc",
+      "path": true
+    }
+  ],
+  "companions": [
+    {
+      "id": "postgres",
+      "kind": "db",
+      "label": "Postgres",
+      "relation": "linked",
+      "evidence": "trace client span SELECT orders",
+      "subtitle": "uses",
+      "anchor": "svc"
+    },
+    {
+      "id": "redis",
+      "kind": "db",
+      "label": "Redis",
+      "relation": "linked",
+      "evidence": "trace client span GET",
+      "subtitle": "uses",
+      "anchor": "svc"
+    },
+    {
+      "id": "prometheus",
+      "kind": "service",
+      "label": "Prometheus",
+      "relation": "around",
+      "evidence": "trace namespace checkout",
+      "subtitle": "release"
+    }
+  ],
+  "caps": {
+    "companions": 8
+  }
+}

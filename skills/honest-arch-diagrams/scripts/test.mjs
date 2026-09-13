@@ -18,9 +18,10 @@ import { fromK8s } from '../adapters/k8s/from-k8s.mjs';
 import { fromTerraform } from '../adapters/terraform/from-terraform.mjs';
 import { fromOpenApi } from '../adapters/openapi/from-openapi.mjs';
 import { fromGitops } from '../adapters/gitops/from-gitops.mjs';
+import { fromTrace } from '../adapters/trace/from-trace.mjs';
 import { toD2 } from './to-d2.mjs';
 import { parseJsonOrYaml } from './yaml.mjs';
-
+import { spawnSync } from 'node:child_process';
 const skillRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = join(skillRoot, '..', '..');
 let failures = 0;
@@ -282,6 +283,58 @@ check(
   front.hops.filter((h) => h.kind === 'service').length === 1
     && (front.companions.some((c) => /backend/i.test(c.label) || /backend/i.test(c.id)) || front.companions.some((c) => /PYTHON_BACKEND/.test(c.evidence))),
 );
+
+// --- 13. trace adapter (runtime path evidence) ---
+console.log('# trace adapter');
+const traceFix = readJson(join(skillRoot, 'adapters/trace/fixtures/checkout.trace.json'));
+const traceModel = fromTrace(traceFix, { app: 'checkout' });
+check('trace output lints clean', lintModel(traceModel).length === 0, lintModel(traceModel).join('; '));
+check('trace derives dns + tls + service', ['dns', 'tls', 'service'].every((k) => traceModel.hops.some((h) => h.kind === k)));
+check('trace linked companions from CLIENT spans', traceModel.companions.filter((c) => c.relation === 'linked').length >= 2);
+check('trace around only same k8s namespace', traceModel.companions.some((c) => c.relation === 'around' && /prometheus/i.test(c.label)));
+check('trace omits other-namespace services from around', !traceModel.companions.some((c) => /payments/i.test(c.label)));
+check('trace evidence never invents ingress', !traceModel.hops.some((h) => h.kind === 'ingress' || h.kind === 'httproute'));
+
+// OTel-shaped export (resourceSpans)
+const otelShaped = {
+  resourceSpans: [{
+    resource: { attributes: [
+      { key: 'service.name', value: { stringValue: 'orders' } },
+      { key: 'k8s.namespace.name', value: { stringValue: 'orders' } },
+    ] },
+    scopeSpans: [{
+      spans: [
+        {
+          name: 'GET /orders', kind: 2,
+          attributes: [
+            { key: 'http.host', value: { stringValue: 'orders.example.com' } },
+            { key: 'http.scheme', value: { stringValue: 'https' } },
+          ],
+        },
+        {
+          name: 'HTTP GET', kind: 3,
+          attributes: [
+            { key: 'peer.service', value: { stringValue: 'payments' } },
+            { key: 'http.url', value: { stringValue: 'https://user:SECRET@payments.example.com/charge' } },
+          ],
+        },
+      ],
+    }],
+  }],
+};
+const otelModel = fromTrace(otelShaped, { app: 'orders' });
+check('otel-shaped export lints clean', lintModel(otelModel).length === 0, lintModel(otelModel).join('; '));
+check('otel never leaks URL credentials', !JSON.stringify(otelModel).includes('SECRET') && !JSON.stringify(otelModel).includes('user:'));
+check('otel linked peer from CLIENT span', otelModel.companions.some((c) => c.relation === 'linked' && /payments/i.test(c.label)));
+
+// --- 14. CLI router ---
+console.log('# cli router');
+const cliPath = join(skillRoot, 'scripts/cli.mjs');
+const help = spawnSync(process.execPath, [cliPath, '--help'], { encoding: 'utf8' });
+check('cli --help exits 0', help.status === 0);
+check('cli --help lists from-trace', /from-trace/.test(help.stdout + help.stderr));
+const cliLint = spawnSync(process.execPath, [cliPath, 'lint', join(repoRoot, 'examples/checkout-from-trace.model.json')], { encoding: 'utf8' });
+check('cli lint checkout-from-trace passes', cliLint.status === 0, cliLint.stderr || cliLint.stdout);
 
 console.log(`\n${failures === 0 ? 'PASS' : 'FAIL'} — ${failures} failing check(s).`);
 process.exit(failures === 0 ? 0 : 1);
