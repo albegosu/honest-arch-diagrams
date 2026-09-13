@@ -1,0 +1,9 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/albegosu/honest-arch-diagrams/blob/main/SECURITY.md
+    about: Credential leaks or honesty bypasses — report privately (see SECURITY.md).
+  - name: Usage question
+    url: https://github.com/albegosu/honest-arch-diagrams/issues/new?labels=question
+    about: How to use adapters, lint, layout, or the skill with your agent.

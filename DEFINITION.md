@@ -52,8 +52,9 @@ narrow, opinionated thing: **the honesty grammar for a single application's requ
 - Theming, color systems, export pipelines (use Archify).
 - C4 System/Container/Component modeling (use the C4 skill).
 - File-level or symbol-level inventories (use ArchPresent).
-- Coupling to any specific platform API. Adapters that read real evidence
-  (Kubernetes, Terraform, OpenAPI) are optional add-ons, not the core.
+- Whole-namespace / multi-app maps in a single model (one app / one spine only).
+- Coupling to any specific platform product API. Adapters that read real evidence
+  (Kubernetes, GitOps, Terraform, OpenAPI, traces) are optional add-ons, not the core.
 
 ## Target users
 

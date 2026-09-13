@@ -12,6 +12,13 @@ labels: bug
 
 <!-- What should have happened under the honesty rules -->
 
+### Dishonesty?
+
+- [ ] Invented hop / missing evidence
+- [ ] Companion on the accented path
+- [ ] Secret or credential value leaked into model/SVG
+- [ ] Other
+
 ### Repro
 
 ```bash
