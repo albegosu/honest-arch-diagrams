@@ -17,6 +17,9 @@ import { validateSchema } from './schema.mjs';
 import { fromK8s } from '../adapters/k8s/from-k8s.mjs';
 import { fromTerraform } from '../adapters/terraform/from-terraform.mjs';
 import { fromOpenApi } from '../adapters/openapi/from-openapi.mjs';
+import { fromGitops } from '../adapters/gitops/from-gitops.mjs';
+import { toD2 } from './to-d2.mjs';
+import { parseJsonOrYaml } from './yaml.mjs';
 
 const skillRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = join(skillRoot, '..', '..');
@@ -218,6 +221,66 @@ check(
   'layout draws a +N more overflow card',
   overflowGeom.nodes.some((n) => n.id === '__overflow' && n.label === '+3 more'),
   overflowGeom.nodes.map((n) => n.label).join(', '),
+);
+
+// --- 9. to-d2: accented spine + dashed linked companions ---
+console.log('# to-d2 generator');
+const checkoutModel = readJson(join(repoRoot, 'examples/checkout-service.model.json'));
+const d2 = toD2(checkoutModel);
+check('to-d2 emits direction: right', /direction:\s*right/.test(d2));
+check('to-d2 accents the verified path', /stroke:\s*\$\{accent\}/.test(d2));
+check('to-d2 draws linked companions dashed', /Postgres[\s\S]*stroke-dash:\s*3/.test(d2) || /data\.pg[\s\S]*stroke-dash:\s*3/i.test(d2) || /secret DATABASE_URL[\s\S]*stroke-dash:\s*3/.test(d2));
+check('to-d2 puts around companions in Release band', /Also in this release/.test(d2) && /Prometheus/.test(d2));
+check('to-d2 never invents hops missing from the model', !/RedisX|fakething/i.test(d2));
+
+// --- 10. openapi YAML (same evidence as JSON fixture) ---
+console.log('# openapi YAML');
+const oapiYamlPath = join(skillRoot, 'adapters/openapi/fixtures/orders.openapi.yaml');
+const oapiYamlDoc = parseJsonOrYaml(readFileSync(oapiYamlPath, 'utf8'), oapiYamlPath);
+const oapiYamlModel = fromOpenApi(oapiYamlDoc);
+check('yaml openapi parses to an object', oapiYamlDoc && !Array.isArray(oapiYamlDoc) && oapiYamlDoc.openapi);
+check('yaml openapi output lints clean', lintModel(oapiYamlModel).length === 0, lintModel(oapiYamlModel).join('; '));
+check('yaml openapi matches json companion count', oapiYamlModel.companions.length === oapiModel.companions.length);
+check('yaml openapi derives dns + identity + service', ['dns', 'oauth2_proxy', 'service'].every((k) => oapiYamlModel.hops.some((h) => h.kind === k)));
+
+// --- 11. gitops adapter (YAML manifests + optional values) ---
+console.log('# gitops adapter');
+const gitopsDir = join(skillRoot, 'adapters/gitops/fixtures/checkout');
+const gitopsModel = fromGitops(join(gitopsDir, 'manifests.yaml'), {
+  app: 'checkout',
+  valuesPath: join(gitopsDir, 'values.yaml'),
+});
+check('gitops output lints clean', lintModel(gitopsModel).length === 0, lintModel(gitopsModel).join('; '));
+check('gitops derives ingress + svc + pod', ['ingress', 'svc', 'pod'].every((id) => gitopsModel.hops.some((h) => h.id === id)));
+check('gitops linked from env/secret in manifests', gitopsModel.companions.some((c) => c.relation === 'linked' && /^(secret|env) /.test(c.evidence)));
+check('gitops around includes co-located prometheus', gitopsModel.companions.some((c) => c.relation === 'around' && /prom/i.test(c.label)));
+check(
+  'gitops values add PAYMENTS_URL as linked (name only)',
+  gitopsModel.companions.some((c) => c.evidence === 'values PAYMENTS_URL' && c.relation === 'linked'),
+);
+check('gitops never emits APP_VERSION as a companion', !gitopsModel.companions.some((c) => /VERSION/i.test(c.id) || /VERSION/i.test(c.evidence)));
+check('gitops never leaks values host strings as secret material', !JSON.stringify(gitopsModel).includes('SUPERSECRET'));
+
+// --- 12. k8s --app filter (multi-service dump → one spine) ---
+console.log('# k8s --app filter');
+const multi = readJson(join(skillRoot, 'adapters/k8s/fixtures/multi-app.k8s.json'));
+const front = fromK8s(multi, { app: 'frontend' });
+const back = fromK8s(multi, { app: 'backend' });
+check('frontend model lints clean', lintModel(front).length === 0, lintModel(front).join('; '));
+check('backend model lints clean', lintModel(back).length === 0, lintModel(back).join('; '));
+check('frontend spine service is frontend', front.hops.find((h) => h.id === 'svc')?.label === 'frontend');
+check('backend spine service is backend', back.hops.find((h) => h.id === 'svc')?.label === 'backend');
+check('frontend dns is frontend host', front.hops.find((h) => h.id === 'dns')?.label === 'frontend.example.com');
+check('backend dns is backend host', back.hops.find((h) => h.id === 'dns')?.label === 'backend.example.com');
+check(
+  'frontend does not put backend on the accented path',
+  !front.edges.some((e) => e.path && (e.from === 'backend' || e.to === 'backend'))
+    && !front.hops.some((h) => h.id === 'svc' && h.label === 'backend'),
+);
+check(
+  'other app appears as around (or linked via env), not a second svc hop',
+  front.hops.filter((h) => h.kind === 'service').length === 1
+    && (front.companions.some((c) => /backend/i.test(c.label) || /backend/i.test(c.id)) || front.companions.some((c) => /PYTHON_BACKEND/.test(c.evidence))),
 );
 
 console.log(`\n${failures === 0 ? 'PASS' : 'FAIL'} — ${failures} failing check(s).`);

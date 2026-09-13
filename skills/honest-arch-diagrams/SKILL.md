@@ -8,7 +8,7 @@ description: >-
 license: MIT
 metadata:
   author: Alberto Gonzalez
-  version: "0.7.1"
+  version: "0.8.0"
 ---
 
 # Honest architecture diagrams
@@ -57,11 +57,13 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
    (env host, Secret *name*, ConfigMap host, declared server). Never read Secret values.
    When a real source exists, skip hand-building and derive the model from it (paths are
    relative to this skill directory). Pass `--app <name>` when the dump contains more than
-   one service:
+   one service (required for honest single-spine diagrams):
    - Kubernetes: `kubectl get ingress,svc,endpoints,deploy -n <ns> -o json > d.json` then
      `node adapters/k8s/from-k8s.mjs d.json --app <name> --out <app>.model.json`.
+   - GitOps / Helm-rendered manifests (YAML or JSON, file or dir): 
+     `node adapters/gitops/from-gitops.mjs <path> --app <name> [--values values.yaml] --out <app>.model.json`.
    - Terraform: `terraform show -json > t.json` then `node adapters/terraform/from-terraform.mjs t.json --app <name> --out <app>.model.json`.
-   - OpenAPI: `node adapters/openapi/from-openapi.mjs <spec>.json --out <app>.model.json`.
+   - OpenAPI (JSON or YAML): `node adapters/openapi/from-openapi.mjs <spec>.json|.yaml --out <app>.model.json`.
    Each source carries different evidence strength (runtime > infrastructure > declared);
    keep that in mind when reading the result.
 2. **Build the model.** Fill `{ hops[], edges[], companions[] }` per
@@ -78,8 +80,9 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 5. **Render (default).** Run the bundled reference layout and present the SVG:
    `node scripts/layout.mjs <app>.model.json --svg <app>.svg`
    That enforces Data under Workload and orthogonal elbows. Only if the user asks for D2,
-   emit D2 (`references/rendering-d2.md`). Mermaid only as an explicit last resort (see
-   Hard constraints). Accent only the verified path.
+   generate it with `node scripts/to-d2.mjs <app>.model.json --out <app>.d2` (see
+   `references/rendering-d2.md`). Mermaid only as an explicit last resort (see Hard
+   constraints). Accent only the verified path.
 6. **Self-check.** Run the checklist below before presenting.
 
 ## Self-check (must all pass)
@@ -103,9 +106,11 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 - `references/layout.md` — ranking, orthogonal elbows, the hop-arc.
 - `references/rendering-d2.md` — D2 output patterns (+ Mermaid last-resort notes).
 - `scripts/layout.mjs` — **default** renderer; lane packer + elbow router; emits SVG.
-- `adapters/k8s/from-k8s.mjs` — derive a model from a Kubernetes JSON dump (evidence, no secret values).
+- `scripts/to-d2.mjs` — optional model → D2 generator (accented path, dashed companions).
+- `adapters/k8s/from-k8s.mjs` — derive a model from a Kubernetes JSON dump (evidence, no secret values). Pass `--app` on multi-service dumps.
+- `adapters/gitops/from-gitops.mjs` — derive from declared YAML/JSON manifests (GitOps / Helm-rendered).
 - `adapters/terraform/from-terraform.mjs` — derive from `terraform show -json` (around by default, linked on reference).
-- `adapters/openapi/from-openapi.mjs` — derive from an OpenAPI 3.x document (declared `x-depends-on` only).
+- `adapters/openapi/from-openapi.mjs` — derive from an OpenAPI 3.x JSON or YAML document (declared `x-depends-on` only).
 
 ## Example
 

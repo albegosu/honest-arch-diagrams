@@ -82,9 +82,13 @@ around them, never at their expense.
   Mermaid is last resort, never the default.
 - Self-check updated; Mermaid/data-model docs aligned.
 
-## v0.8 — Adapter polish
-- Optional YAML input for the OpenAPI adapter.
-- Optional agentskill.sh webhook for instant sync on push.
+## v0.8 — Adapter polish ✅
+- `scripts/to-d2.mjs`: model → D2 (optional themeable output; layout SVG remains default).
+- OpenAPI adapter accepts YAML (zero-dep `scripts/yaml.mjs`).
+- GitOps / Helm adapter: declared manifests (YAML/JSON, multi-doc, dirs) → model; optional
+  Helm `--values` for `*_HOST` / `*_URL` companion names.
+- Stricter k8s `--app` filter so multi-service dumps yield one spine.
+- Optional agentskill.sh webhook for instant sync on push (deferred).
 
 ## How to contribute
 See [`CONTRIBUTING.md`](CONTRIBUTING.md). New lane kinds or evidence sources are welcome as

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // OpenAPI evidence adapter for honest-arch-diagrams.
-// Turns an OpenAPI 3.x document (JSON) into a model.
+// Turns an OpenAPI 3.x document (JSON or YAML) into a model.
 //
 // Honesty stance — an OpenAPI document proves what the contract DECLARES, which is weaker
 // than runtime (k8s) or infrastructure (Terraform) evidence, so the adapter stays minimal:
@@ -13,9 +13,10 @@
 //     the model has no linked companions.
 //
 // Usage:
-//   node adapters/openapi/from-openapi.mjs <openapi.json> [--app <name>] [--out <model.json>]
+//   node adapters/openapi/from-openapi.mjs <openapi.json|yaml> [--app <name>] [--out <model.json>]
 
 import { readFileSync, writeFileSync } from 'node:fs';
+import { parseJsonOrYaml } from '../../scripts/yaml.mjs';
 
 const slug = (s) =>
   String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'x';
@@ -93,10 +94,14 @@ function main() {
   const appIdx = args.indexOf('--app');
   const outIdx = args.indexOf('--out');
   if (!file) {
-    console.error('usage: node adapters/openapi/from-openapi.mjs <openapi.json> [--app <name>] [--out <model.json>]');
+    console.error('usage: node adapters/openapi/from-openapi.mjs <openapi.json|yaml> [--app <name>] [--out <model.json>]');
     process.exit(1);
   }
-  const doc = JSON.parse(readFileSync(file, 'utf8'));
+  const doc = parseJsonOrYaml(readFileSync(file, 'utf8'), file);
+  if (!doc || Array.isArray(doc)) {
+    console.error('expected a single OpenAPI document (JSON or YAML)');
+    process.exit(1);
+  }
   const model = fromOpenApi(doc, { app: appIdx !== -1 ? args[appIdx + 1] : undefined });
   const json = JSON.stringify(model, null, 2);
   if (outIdx !== -1 && args[outIdx + 1]) {

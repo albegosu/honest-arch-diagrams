@@ -70,12 +70,11 @@ d2 examples/checkout-service.d2 checkout-service.svg
 
 ## Example
 
-`examples/checkout-service.model.json` is the source of truth. The hand-authored
-`examples/checkout-service.d2` (and its `.svg` / `.png`) is an **illustrative** D2 render of
-that model; prefer the skill's `scripts/layout.mjs` when you need the grammar exactly. Blue
-marks the verified path; Postgres and Redis are `linked` companions (dashed, with the
-evidence in the edge label); Prometheus is an `around` companion ("also in this release,"
-no connector).
+`examples/checkout-service.model.json` is the source of truth. Prefer `scripts/layout.mjs`
+for the grammar-exact SVG. Optional D2: `npm run to-d2` writes
+`examples/checkout-service.generated.d2` (hand-authored `checkout-service.d2` remains an
+illustration). Blue marks the verified path; Postgres and Redis are `linked` companions
+(dashed, with evidence in the edge label); Prometheus is an `around` companion.
 
 ![Honest request-path diagram for the checkout service](examples/checkout-service.png)
 
@@ -131,13 +130,25 @@ env/Secret **names** as evidence:
 
 ```bash
 kubectl get ingress,svc,endpoints,deploy -n checkout -o json > dump.json
-node skills/honest-arch-diagrams/adapters/k8s/from-k8s.mjs dump.json --out checkout.model.json
+node skills/honest-arch-diagrams/adapters/k8s/from-k8s.mjs dump.json --app checkout --out checkout.model.json
 node skills/honest-arch-diagrams/scripts/layout.mjs checkout.model.json --svg checkout.svg
 ```
 
+Pass `--app` whenever the dump has more than one service so the spine stays single-app.
 It never reads Secret or ConfigMap **values**, and it strips any `user:pass` credentials
 from hostnames. A golden test decodes the Secret in the fixture and asserts its value never
 reaches the model.
+
+### GitOps / Helm — declared-config evidence
+
+When live `kubectl` is unavailable, derive from rendered manifests (YAML or JSON, single-
+or multi-doc, or a directory). Optional `--values` adds linked companions from `*_HOST` /
+`*_URL` keys (names only, never credential-bearing values):
+
+```bash
+node skills/honest-arch-diagrams/adapters/gitops/from-gitops.mjs ./manifests \
+  --app checkout --values values.yaml --out checkout.model.json
+```
 
 ### Terraform — infrastructure evidence
 
@@ -158,11 +169,11 @@ emitted.
 
 ### OpenAPI — declared-contract evidence
 
-Turns an OpenAPI 3.x document (JSON) into the model. This is the weakest evidence — what the
-contract *declares*, not what runs — so the adapter stays minimal:
+Turns an OpenAPI 3.x document (JSON or YAML) into the model. This is the weakest evidence —
+what the contract *declares*, not what runs — so the adapter stays minimal:
 
 ```bash
-node skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs orders.openapi.json --out orders.model.json
+node skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs orders.openapi.yaml --out orders.model.json
 ```
 
 `servers[0]`, `info.title`, and a global oauth2/openIdConnect scheme form the spine.
@@ -195,8 +206,10 @@ Full detail in [`skills/honest-arch-diagrams/references/honesty-rules.md`](skill
 - [`CHANGELOG.md`](CHANGELOG.md) — version history.
 - [`skills/honest-arch-diagrams/SKILL.md`](skills/honest-arch-diagrams/SKILL.md) — the skill entry point.
 - [`skills/honest-arch-diagrams/adapters/k8s/from-k8s.mjs`](skills/honest-arch-diagrams/adapters/k8s/from-k8s.mjs) — Kubernetes adapter.
+- [`skills/honest-arch-diagrams/adapters/gitops/from-gitops.mjs`](skills/honest-arch-diagrams/adapters/gitops/from-gitops.mjs) — GitOps / Helm manifests adapter.
 - [`skills/honest-arch-diagrams/adapters/terraform/from-terraform.mjs`](skills/honest-arch-diagrams/adapters/terraform/from-terraform.mjs) — Terraform adapter.
-- [`skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs`](skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs) — OpenAPI adapter.
+- [`skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs`](skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs) — OpenAPI adapter (JSON/YAML).
+- [`skills/honest-arch-diagrams/scripts/to-d2.mjs`](skills/honest-arch-diagrams/scripts/to-d2.mjs) — model → D2 generator.
 
 ## License
 

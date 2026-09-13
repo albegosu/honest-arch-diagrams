@@ -4,6 +4,22 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.8.0] — 2026-09-13
+
+### Added
+- `scripts/to-d2.mjs`: generate D2 from a model (accented spine, dashed linked edges,
+  "Also in this release" for around/overflow). `npm run to-d2`.
+- OpenAPI adapter accepts YAML via zero-dependency `scripts/yaml.mjs` (same honesty as JSON).
+- GitOps / Helm adapter (`adapters/gitops/from-gitops.mjs`): YAML/JSON manifests (file or
+  directory) → model via the k8s adapter; optional `--values` adds linked companions from
+  `*_HOST` / `*_URL` keys (names only).
+- Stricter k8s `--app` selection: gateway/service/workload scoped to the app so a
+  multi-service dump cannot become a multi-spine diagram.
+
+### Changed
+- Prefer HTTPRoute over Ingress when both match the app.
+- Skip `*_VERSION` env vars mistaken for hosts.
+
 ## [0.7.1] — 2026-09-13
 
 ### Fixed

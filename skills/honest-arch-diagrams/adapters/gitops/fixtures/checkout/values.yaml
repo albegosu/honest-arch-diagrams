@@ -1,0 +1,9 @@
+# Helm-style values. Only *_HOST / *_URL keys become companion evidence (names only).
+app:
+  name: checkout
+redis:
+  REDIS_HOST: redis.checkout.svc.cluster.local:6379
+payments:
+  PAYMENTS_URL: https://payments.example.com
+image:
+  APP_VERSION: "1.4.2"
