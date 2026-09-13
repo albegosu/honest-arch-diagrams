@@ -77,6 +77,11 @@ around them, never at their expense.
 - README restore: `npx skills add albegosu/honest-arch-diagrams` + skills.sh badge.
 - SKILL frontmatter: `license` + `metadata.version` for agentskills.io compliance.
 
+## v0.7.1 — Agent guidance hardening ✅
+- Hard constraints in `SKILL.md`: one app per model; prefer adapters + lint + `layout.mjs`;
+  Mermaid is last resort, never the default.
+- Self-check updated; Mermaid/data-model docs aligned.
+
 ## v0.8 — Adapter polish
 - Optional YAML input for the OpenAPI adapter.
 - Optional agentskill.sh webhook for instant sync on push.

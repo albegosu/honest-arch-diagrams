@@ -5,7 +5,7 @@ or a hand-built SVG.
 
 ```jsonc
 {
-  "app": "checkout",            // the app under study
+  "app": "checkout",            // ONE service under study — never a namespace of apps
   "hops": [                     // the VERIFIED request path, in order
     {
       "id": "dns",
@@ -33,6 +33,9 @@ or a hand-built SVG.
   "overflow": { "count": 2, "note": "omitted after companion cap" }  // optional
 }
 ```
+
+**One app per model.** `app` is a single service. Other workloads in the same namespace or
+stack are `around` companions (or a second model), never a second spine in the same file.
 
 ## Field rules
 

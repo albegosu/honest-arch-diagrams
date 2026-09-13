@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Honest request-path / service-topology diagrams",
-    "version": "0.7.0"
+    "version": "0.7.1"
   },
   "plugins": [
     {
       "name": "honest-arch-diagrams",
       "description": "Honest service-topology and request-path diagrams. Verified path vs inferred companions.",
-      "version": "0.7.0",
+      "version": "0.7.1",
       "author": {
         "name": "Alberto Gonzalez",
         "email": "albegosu@gmail.com"

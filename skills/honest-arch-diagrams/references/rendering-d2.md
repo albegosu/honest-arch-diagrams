@@ -59,11 +59,16 @@ Rules to keep:
 - Put the evidence string in the `linked` edge label so the diagram is self-auditing.
 - Legend/keys list only kinds present.
 
-## Mermaid fallback
+## Mermaid fallback (last resort)
+
+**Do not default to Mermaid.** Prefer `scripts/layout.mjs` → SVG. Use Mermaid only when the
+user explicitly asks for a Mermaid flowchart, or Node cannot run in the environment.
 
 Mermaid renders in GitHub Markdown but gives you less layout control. Use `flowchart LR`,
 `subgraph` per lane, `-.->` (dashed) for companions, and a `classDef` to accent the path
-class. Do not rely on Mermaid for the hop-arc; accept plain crossings there.
+class. Still: **one app / one spine** — do not dump a whole namespace into one chart. Do not
+rely on Mermaid for the hop-arc; accept plain crossings there. Keep evidence strings on
+linked edges.
 
 ## SVG fallback
 

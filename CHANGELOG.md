@@ -4,6 +4,14 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.7.1] — 2026-09-13
+
+### Fixed
+- SKILL hard constraints after real-agent misuse: **one app / one spine** per model; default
+  deliverable is model + lint + `layout.mjs` SVG; **do not default to Mermaid** (last resort
+  only). Namespace maps and multi-service spines are out of scope for a single model.
+- Clarified Mermaid section in `rendering-d2.md` and `app` semantics in `data-model.md`.
+
 ## [0.7.0] — 2026-09-13
 
 ### Added
@@ -73,6 +81,7 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - Initial skill: honesty rules, visual grammar, data model, D2 rendering guidance, and the
   checkout-service example.
 
+[0.7.1]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.7.1
 [0.7.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.7.0
 [0.6.1]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.6.1
 [0.6.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.6.0
