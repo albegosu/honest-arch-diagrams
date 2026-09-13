@@ -1,0 +1,56 @@
+# Honest request-path diagram for the `checkout` service.
+# Render: d2 checkout-service.d2 checkout-service.svg
+# Accent (blue) marks ONLY the verified path. Companions are dashed.
+
+direction: right
+
+vars: {
+  accent: "#2563eb"
+}
+
+# --- Lanes (verified spine) ---
+Edge: Edge {
+  dns: checkout.example.com
+  lb: Load balancer
+  tls: TLS termination
+}
+
+Gateway: Gateway {
+  ingress: Ingress
+}
+
+Identity: Identity {
+  oauth: oauth2-proxy
+}
+
+App: App {
+  svc: checkout
+}
+
+Workload: Workload {
+  pod: "checkout-7c9…"
+}
+
+Data: Data {
+  pg: Postgres
+  redis: Redis
+}
+
+# --- Verified path (accented) ---
+Edge.dns -> Edge.lb -> Gateway.ingress -> Identity.oauth -> App.svc -> Workload.pod: {
+  style: { stroke: ${accent}; stroke-width: 2 }
+}
+
+# --- Linked companions: dashed 'uses', evidence in the label ---
+App.svc -> Data.pg: "uses (secret DATABASE_URL)" {
+  style: { stroke-dash: 3 }
+}
+App.svc -> Data.redis: "uses (env REDIS_HOST)" {
+  style: { stroke-dash: 3 }
+}
+
+# --- Around companion: dashed card, NO connector ---
+Release: "Also in this release" {
+  style: { stroke-dash: 4 }
+  prometheus: Prometheus
+}

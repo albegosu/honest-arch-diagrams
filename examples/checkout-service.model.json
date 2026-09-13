@@ -1,0 +1,25 @@
+{
+  "app": "checkout",
+  "hops": [
+    { "id": "dns", "kind": "dns", "label": "checkout.example.com", "lane": "Edge", "evidence": "DNS record" },
+    { "id": "lb", "kind": "lb", "label": "Load balancer", "lane": "Edge", "evidence": "Service type=LoadBalancer" },
+    { "id": "tls", "kind": "tls", "label": "TLS termination", "lane": "Edge", "evidence": "ACM cert on listener" },
+    { "id": "ingress", "kind": "ingress", "label": "Ingress", "lane": "Gateway", "evidence": "Ingress host match" },
+    { "id": "oauth", "kind": "oauth2_proxy", "label": "oauth2-proxy", "lane": "Identity", "evidence": "auth annotation on route" },
+    { "id": "svc", "kind": "service", "label": "checkout", "lane": "App", "evidence": "Service selector" },
+    { "id": "pod", "kind": "pod", "label": "checkout-7c9…", "lane": "Workload", "evidence": "Endpoints target" }
+  ],
+  "edges": [
+    { "from": "dns", "to": "lb", "path": true },
+    { "from": "lb", "to": "ingress", "path": true },
+    { "from": "ingress", "to": "oauth", "path": true },
+    { "from": "oauth", "to": "svc", "path": true },
+    { "from": "svc", "to": "pod", "path": true }
+  ],
+  "companions": [
+    { "id": "pg", "kind": "db", "label": "Postgres", "relation": "linked", "evidence": "secret DATABASE_URL", "subtitle": "uses", "anchor": "svc" },
+    { "id": "redis", "kind": "db", "label": "Redis", "relation": "linked", "evidence": "env REDIS_HOST", "subtitle": "uses", "anchor": "svc" },
+    { "id": "prometheus", "kind": "controller", "label": "Prometheus", "relation": "around", "evidence": "same Argo app checkout", "subtitle": "release" }
+  ],
+  "caps": { "companions": 8 }
+}

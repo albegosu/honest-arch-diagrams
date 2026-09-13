@@ -1,0 +1,71 @@
+---
+name: honest-arch-diagrams
+description: >-
+  Draw honest service-topology and request-path architecture diagrams. Use when asked to
+  diagram how a request flows through a service (edge, gateway, auth, app, workload, data),
+  map a service and its dependencies, or turn code, manifests, or telemetry into an
+  architecture sketch. Separates the VERIFIED request path from INFERRED companions, never
+  invents components, and renders with a consistent lane grammar to D2, SVG, or Mermaid.
+  Not for C4 documentation, diagram theming, or file-level inventories.
+---
+
+# Honest architecture diagrams
+
+A request-path diagram is only useful if the reader can trust it. This skill produces
+diagrams where every element is auditable: is it observed or inferred, and on what
+evidence? Prefer an incomplete honest diagram over a complete confident guess.
+
+## When to use
+
+- "Diagram how a request reaches this service / pod."
+- "Map this service and its dependencies."
+- "Turn these manifests / this repo / this trace into an architecture sketch."
+
+## When NOT to use
+
+- C4 System/Container/Component docs → use a C4 skill.
+- "Make it look beautiful," theming, export pipelines → use Archify.
+- File-level or symbol-level inventories → use ArchPresent.
+
+## The one rule
+
+**Never draw what you did not observe.** A hop you did not verify is absent, not guessed.
+A dependency you inferred is a *companion*, drawn differently from the path, and it carries
+its evidence. See `references/honesty-rules.md` — this is the core of the skill.
+
+## Workflow
+
+1. **Gather evidence.** From the description, repo, manifests, or telemetry, collect only
+   facts: which hops are on the path, which dependencies have concrete evidence
+   (env host, Secret *name*, ConfigMap host, declared server). Never read Secret values.
+2. **Build the model.** Fill `{ hops[], edges[], companions[] }` per
+   `references/data-model.md`. Stamp each element with `evidence` and, for companions,
+   `relation` (`linked` = evidence-backed edge; `around` = co-located by release/owner).
+3. **Apply the honesty rules.** Drop any element that fails them. Cap companions (default 8).
+4. **Lay out.** Assign lanes (Edge / Gateway / Identity / App / Workload / Data) and route
+   edges per `references/visual-grammar.md` and `references/layout.md`.
+5. **Render.** Emit D2 first (`references/rendering-d2.md`); Mermaid or hand-built SVG as
+   fallback. Accent only the verified path.
+6. **Self-check.** Run the checklist below before presenting.
+
+## Self-check (must all pass)
+
+- [ ] Every hop on the path has evidence; nothing was added "to look complete."
+- [ ] `linked` companions have a concrete evidence string; `around` companions say
+      "also in this release," not "called by."
+- [ ] No companion sits on the request path or in the arterial/accented edges.
+- [ ] No TLS/auth/datastore hop was invented from a name guess.
+- [ ] Companion count is within the cap; extras are summarized, not faked.
+- [ ] If rendered with motion, it respects `prefers-reduced-motion`.
+
+## References
+
+- `references/honesty-rules.md` — the invariant. Read first.
+- `references/data-model.md` — the `{hops, edges, companions}` shape + fields.
+- `references/visual-grammar.md` — lanes, stacking, accent, satellites.
+- `references/layout.md` — ranking, orthogonal elbows, the hop-arc.
+- `references/rendering-d2.md` — D2 output patterns (+ Mermaid/SVG notes).
+
+## Example
+
+`examples/checkout-service.model.json` → `examples/checkout-service.d2`.
