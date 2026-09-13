@@ -150,6 +150,31 @@ node skills/honest-arch-diagrams/adapters/gitops/from-gitops.mjs ./manifests \
   --app checkout --values values.yaml --out checkout.model.json
 ```
 
+### Traces — observed-path evidence
+
+Turns an OpenTelemetry JSON export (or a simplified `{ app, spans }` list) into the model.
+SERVER spans of the target app form the spine; CLIENT peers become `linked`; other services
+are `around` only when they share `k8s.namespace.name`:
+
+```bash
+node skills/honest-arch-diagrams/adapters/trace/from-trace.mjs trace.json --app checkout --out checkout.model.json
+# or
+npx honest-arch from-trace trace.json --app checkout --out checkout.model.json
+```
+
+URL credentials in span attributes are stripped; ingress/oauth hops are never invented from
+span names alone.
+
+## CLI
+
+After `npm link` (or from the repo):
+
+```bash
+node skills/honest-arch-diagrams/scripts/cli.mjs --help
+honest-arch lint examples/checkout-service.model.json
+honest-arch from-k8s dump.json --app checkout --out checkout.model.json
+```
+
 ### Terraform — infrastructure evidence
 
 Turns `terraform show -json` (state or plan) into the model. Terraform proves a resource
@@ -209,7 +234,9 @@ Full detail in [`skills/honest-arch-diagrams/references/honesty-rules.md`](skill
 - [`skills/honest-arch-diagrams/adapters/gitops/from-gitops.mjs`](skills/honest-arch-diagrams/adapters/gitops/from-gitops.mjs) — GitOps / Helm manifests adapter.
 - [`skills/honest-arch-diagrams/adapters/terraform/from-terraform.mjs`](skills/honest-arch-diagrams/adapters/terraform/from-terraform.mjs) — Terraform adapter.
 - [`skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs`](skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs) — OpenAPI adapter (JSON/YAML).
+- [`skills/honest-arch-diagrams/adapters/trace/from-trace.mjs`](skills/honest-arch-diagrams/adapters/trace/from-trace.mjs) — Trace / OpenTelemetry adapter.
 - [`skills/honest-arch-diagrams/scripts/to-d2.mjs`](skills/honest-arch-diagrams/scripts/to-d2.mjs) — model → D2 generator.
+- [`skills/honest-arch-diagrams/scripts/cli.mjs`](skills/honest-arch-diagrams/scripts/cli.mjs) — `honest-arch` CLI.
 
 ## License
 

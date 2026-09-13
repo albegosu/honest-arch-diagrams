@@ -4,6 +4,16 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.9.0] — 2026-09-13
+
+### Added
+- Trace / OpenTelemetry adapter (`adapters/trace/from-trace.mjs`): observed SERVER spans
+  form the spine; CLIENT peers become `linked`; other services are `around` only when they
+  share `k8s.namespace.name`. Never invents ingress/oauth from span names; strips URL
+  credentials. Example: `examples/checkout-from-trace.model.json`.
+- Unified CLI (`scripts/cli.mjs`, bin `honest-arch`): `lint`, `layout`, `to-d2`, `test`,
+  and all `from-*` adapters under one entry.
+
 ## [0.8.0] — 2026-09-13
 
 ### Added

@@ -90,6 +90,12 @@ around them, never at their expense.
 - Stricter k8s `--app` filter so multi-service dumps yield one spine.
 - Optional agentskill.sh webhook for instant sync on push (deferred).
 
+## v0.9 — Trace evidence + CLI ✅
+- `adapters/trace/from-trace.mjs`: OpenTelemetry / simplified span JSON → model. Runtime
+  path evidence (SERVER → spine, CLIENT peers → linked). Co-located services are `around`
+  only with shared `k8s.namespace.name`.
+- `scripts/cli.mjs` / bin `honest-arch`: one entry for lint, layout, to-d2, test, from-*.
+
 ## How to contribute
 See [`CONTRIBUTING.md`](CONTRIBUTING.md). New lane kinds or evidence sources are welcome as
 long as they keep the observed-vs-inferred split explicit. Open an issue describing the
