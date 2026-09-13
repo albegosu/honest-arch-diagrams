@@ -3,7 +3,7 @@
 Geometry rules that make the sketch readable. A renderer with its own layout engine (D2,
 ELK) can delegate most of this; the values below match the bundled reference layout.
 
-> Source of truth: [`scripts/layout.mjs`](../../../scripts/layout.mjs). Keep this doc in
+> Source of truth: [`scripts/layout.mjs`](../scripts/layout.mjs). Keep this doc in
 > sync with that file.
 
 ## Ranking (columns)

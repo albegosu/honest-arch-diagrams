@@ -1,6 +1,7 @@
 # honest-arch-diagrams
 
 [![CI](https://github.com/albegosu/honest-arch-diagrams/actions/workflows/ci.yml/badge.svg)](https://github.com/albegosu/honest-arch-diagrams/actions/workflows/ci.yml)
+[![skills.sh](https://skills.sh/b/albegosu/honest-arch-diagrams)](https://skills.sh/albegosu/honest-arch-diagrams)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 An [Agent Skill](https://agentskills.io) for drawing **honest service-topology and
@@ -25,7 +26,22 @@ GitHub Copilot CLI, OpenCode.
 
 ## Install
 
-Clone and copy the skill into your agent's skills directory:
+With the [skills CLI](https://github.com/vercel-labs/skills) (recommended):
+
+```bash
+npx skills add albegosu/honest-arch-diagrams
+```
+
+That installs the full skill package (`SKILL.md`, references, scripts, adapters, schema).
+
+### Claude Code plugin
+
+```text
+/plugin marketplace add albegosu/honest-arch-diagrams
+/plugin install honest-arch-diagrams@honest-arch-diagrams
+```
+
+### Manual copy
 
 ```bash
 git clone https://github.com/albegosu/honest-arch-diagrams
@@ -36,8 +52,6 @@ cp -r honest-arch-diagrams/skills/honest-arch-diagrams .github/skills/   # GitHu
 
 In Cursor you can also add it as a Remote Rule pointing at
 `https://github.com/albegosu/honest-arch-diagrams`.
-
-Marketplace listing (skills.sh / agentskills.io) is planned for v0.7.
 
 ## Use it
 
@@ -58,9 +72,10 @@ d2 examples/checkout-service.d2 checkout-service.svg
 
 `examples/checkout-service.model.json` is the source of truth. The hand-authored
 `examples/checkout-service.d2` (and its `.svg` / `.png`) is an **illustrative** D2 render of
-that model; prefer `scripts/layout.mjs` when you need the grammar exactly. Blue marks the
-verified path; Postgres and Redis are `linked` companions (dashed, with the evidence in the
-edge label); Prometheus is an `around` companion ("also in this release," no connector).
+that model; prefer the skill's `scripts/layout.mjs` when you need the grammar exactly. Blue
+marks the verified path; Postgres and Redis are `linked` companions (dashed, with the
+evidence in the edge label); Prometheus is an `around` companion ("also in this release,"
+no connector).
 
 ![Honest request-path diagram for the checkout service](examples/checkout-service.png)
 
@@ -73,7 +88,7 @@ orthogonal elbows with a hop-arc over crossings. It emits geometry as JSON and a
 self-contained SVG (Node 18+, no dependencies):
 
 ```bash
-node scripts/layout.mjs examples/checkout-service.model.json --svg checkout-service.svg
+node skills/honest-arch-diagrams/scripts/layout.mjs examples/checkout-service.model.json --svg checkout-service.svg
 ```
 
 ![Grammar-exact layout: Postgres and Redis in the Data band under Workload](examples/checkout-service.layout.png)
@@ -84,14 +99,14 @@ Every model is checked against the honesty rules before rendering. The linter is
 dependency-free (Node 18+):
 
 ```bash
-node scripts/lint.mjs examples/checkout-service.model.json
+node skills/honest-arch-diagrams/scripts/lint.mjs examples/checkout-service.model.json
 # PASS examples/checkout-service.model.json (7 hops, 3 companions)
 ```
 
 It fails on invented hops (no evidence), companions without evidence or relation,
 companions drawn on the path, and over-cap companion counts. The structural shape is a live
-contract in [`schema/model.schema.json`](schema/model.schema.json), enforced by a
-zero-dependency validator (`npm run schema`) that the linter and tests both run.
+contract in [`skills/honest-arch-diagrams/schema/model.schema.json`](skills/honest-arch-diagrams/schema/model.schema.json),
+enforced by a zero-dependency validator (`npm run schema`) that the linter and tests both run.
 
 Run the full golden suite (lint + layout geometry + adapter + no-leak checks) with:
 
@@ -106,6 +121,9 @@ derive the model from an actual source instead of trusting the agent to remember
 source carries a different strength of evidence, and the adapters reflect that without
 inflating it.
 
+Paths below are from the repo root. Inside an installed skill directory, drop the
+`skills/honest-arch-diagrams/` prefix.
+
 ### Kubernetes — runtime evidence
 
 Turns a `kubectl ... -o json` dump into the model, using only resource kinds/names and
@@ -113,8 +131,8 @@ env/Secret **names** as evidence:
 
 ```bash
 kubectl get ingress,svc,endpoints,deploy -n checkout -o json > dump.json
-node adapters/k8s/from-k8s.mjs dump.json --out checkout.model.json
-node scripts/layout.mjs checkout.model.json --svg checkout.svg
+node skills/honest-arch-diagrams/adapters/k8s/from-k8s.mjs dump.json --out checkout.model.json
+node skills/honest-arch-diagrams/scripts/layout.mjs checkout.model.json --svg checkout.svg
 ```
 
 It never reads Secret or ConfigMap **values**, and it strips any `user:pass` credentials
@@ -129,7 +147,7 @@ conservative:
 
 ```bash
 terraform show -json > tfshow.json
-node adapters/terraform/from-terraform.mjs tfshow.json --out orders.model.json
+node skills/honest-arch-diagrams/adapters/terraform/from-terraform.mjs tfshow.json --out orders.model.json
 ```
 
 DNS, load balancers, TLS certs, API gateways, and the app resource (Lambda / ECS service /
@@ -144,7 +162,7 @@ Turns an OpenAPI 3.x document (JSON) into the model. This is the weakest evidenc
 contract *declares*, not what runs — so the adapter stays minimal:
 
 ```bash
-node adapters/openapi/from-openapi.mjs orders.openapi.json --out orders.model.json
+node skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs orders.openapi.json --out orders.model.json
 ```
 
 `servers[0]`, `info.title`, and a global oauth2/openIdConnect scheme form the spine.
@@ -176,9 +194,9 @@ Full detail in [`skills/honest-arch-diagrams/references/honesty-rules.md`](skill
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — how to run tests and add an adapter.
 - [`CHANGELOG.md`](CHANGELOG.md) — version history.
 - [`skills/honest-arch-diagrams/SKILL.md`](skills/honest-arch-diagrams/SKILL.md) — the skill entry point.
-- [`adapters/k8s/from-k8s.mjs`](adapters/k8s/from-k8s.mjs) — derive a model from a Kubernetes JSON dump.
-- [`adapters/terraform/from-terraform.mjs`](adapters/terraform/from-terraform.mjs) — derive from `terraform show -json`.
-- [`adapters/openapi/from-openapi.mjs`](adapters/openapi/from-openapi.mjs) — derive from an OpenAPI 3.x document.
+- [`skills/honest-arch-diagrams/adapters/k8s/from-k8s.mjs`](skills/honest-arch-diagrams/adapters/k8s/from-k8s.mjs) — Kubernetes adapter.
+- [`skills/honest-arch-diagrams/adapters/terraform/from-terraform.mjs`](skills/honest-arch-diagrams/adapters/terraform/from-terraform.mjs) — Terraform adapter.
+- [`skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs`](skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs) — OpenAPI adapter.
 
 ## License
 

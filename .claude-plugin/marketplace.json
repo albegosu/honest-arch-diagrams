@@ -1,0 +1,29 @@
+{
+  "name": "honest-arch-diagrams",
+  "owner": {
+    "name": "Alberto Gonzalez",
+    "email": "albegosu@gmail.com"
+  },
+  "metadata": {
+    "description": "Honest request-path / service-topology diagrams",
+    "version": "0.7.0"
+  },
+  "plugins": [
+    {
+      "name": "honest-arch-diagrams",
+      "description": "Honest service-topology and request-path diagrams. Verified path vs inferred companions.",
+      "version": "0.7.0",
+      "author": {
+        "name": "Alberto Gonzalez",
+        "email": "albegosu@gmail.com"
+      },
+      "homepage": "https://github.com/albegosu/honest-arch-diagrams",
+      "repository": "https://github.com/albegosu/honest-arch-diagrams",
+      "license": "MIT",
+      "keywords": ["architecture", "diagrams", "kubernetes", "request-path"],
+      "source": "./",
+      "strict": false,
+      "skills": ["./skills/honest-arch-diagrams"]
+    }
+  ]
+}

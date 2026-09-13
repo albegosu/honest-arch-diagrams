@@ -18,7 +18,8 @@ import { fromK8s } from '../adapters/k8s/from-k8s.mjs';
 import { fromTerraform } from '../adapters/terraform/from-terraform.mjs';
 import { fromOpenApi } from '../adapters/openapi/from-openapi.mjs';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const skillRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = join(skillRoot, '..', '..');
 let failures = 0;
 const check = (name, cond, detail = '') => {
   if (cond) {
@@ -34,7 +35,7 @@ const finite = (n) => typeof n === 'number' && Number.isFinite(n);
 
 // --- 1. every example model lints clean ---
 console.log('# examples lint clean');
-const exDir = join(root, 'examples');
+const exDir = join(repoRoot, 'examples');
 const models = readdirSync(exDir).filter((f) => f.endsWith('.model.json'));
 check('at least two example models exist', models.length >= 2, `found ${models.length}`);
 for (const f of models) {
@@ -67,7 +68,7 @@ for (const f of models) {
 
 // --- 3. k8s adapter: real evidence, no leaked secret values ---
 console.log('# k8s adapter (evidence + no leak)');
-const fixturePath = join(root, 'adapters/k8s/fixtures/checkout.k8s.json');
+const fixturePath = join(skillRoot, 'adapters/k8s/fixtures/checkout.k8s.json');
 const fixture = readJson(fixturePath);
 const model = fromK8s(fixture);
 
@@ -169,7 +170,7 @@ check('derives a linked companion from env host', routeModel.companions.some((c)
 
 // --- 6. terraform adapter: edge spine + honest around/linked split, no leaked values ---
 console.log('# terraform adapter (around by default, linked on reference)');
-const tfDump = readJson(join(root, 'adapters/terraform/fixtures/orders-edge.tfshow.json'));
+const tfDump = readJson(join(skillRoot, 'adapters/terraform/fixtures/orders-edge.tfshow.json'));
 const tfModel = fromTerraform(tfDump);
 check('terraform output lints clean', lintModel(tfModel).length === 0, lintModel(tfModel).join('; '));
 const tfHopKinds = new Set(tfModel.hops.map((h) => h.kind));
@@ -182,7 +183,7 @@ check('terraform never leaks a resource value (password)', !JSON.stringify(tfMod
 
 // --- 7. openapi adapter: declared spine + x-depends-on only ---
 console.log('# openapi adapter (declared contract only)');
-const oapiDoc = readJson(join(root, 'adapters/openapi/fixtures/orders.openapi.json'));
+const oapiDoc = readJson(join(skillRoot, 'adapters/openapi/fixtures/orders.openapi.json'));
 const oapiModel = fromOpenApi(oapiDoc);
 check('openapi output lints clean', lintModel(oapiModel).length === 0, lintModel(oapiModel).join('; '));
 const oapiKinds = new Set(oapiModel.hops.map((h) => h.kind));

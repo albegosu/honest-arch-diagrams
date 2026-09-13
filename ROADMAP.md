@@ -70,10 +70,16 @@ around them, never at their expense.
 - OSS hygiene: `CONTRIBUTING.md`, `CHANGELOG.md`, GitHub issue/PR templates.
 - SKILL frontmatter shortened; D2 example marked illustrative.
 
-## v0.7 — Distribution polish
-- Submit to skills.sh and list on agentskills.io; install-count badge.
+## v0.7 — Distribution polish ✅
+- Self-contained skill package: tooling (`scripts/`, `adapters/`, `schema/`) lives under
+  `skills/honest-arch-diagrams/` so `npx skills add` installs a complete unit.
 - `.claude-plugin/marketplace.json` for the Claude Code `/plugin` flow.
+- README restore: `npx skills add albegosu/honest-arch-diagrams` + skills.sh badge.
+- SKILL frontmatter: `license` + `metadata.version` for agentskills.io compliance.
+
+## v0.8 — Adapter polish
 - Optional YAML input for the OpenAPI adapter.
+- Optional agentskill.sh webhook for instant sync on push.
 
 ## How to contribute
 See [`CONTRIBUTING.md`](CONTRIBUTING.md). New lane kinds or evidence sources are welcome as

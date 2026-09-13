@@ -1,20 +1,20 @@
 {
   "name": "honest-arch-diagrams",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Agent skill: honest service-topology / request-path diagrams. Verified path vs inferred companions, never hallucinate components.",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "honest-arch-lint": "scripts/lint.mjs"
+    "honest-arch-lint": "skills/honest-arch-diagrams/scripts/lint.mjs"
   },
   "scripts": {
-    "lint": "node scripts/lint.mjs",
-    "schema": "node scripts/schema.mjs",
-    "test": "node scripts/test.mjs",
-    "layout": "node scripts/layout.mjs examples/checkout-service.model.json --svg examples/checkout-service.layout.svg",
-    "from-k8s": "node adapters/k8s/from-k8s.mjs adapters/k8s/fixtures/checkout.k8s.json",
-    "from-terraform": "node adapters/terraform/from-terraform.mjs adapters/terraform/fixtures/orders-edge.tfshow.json",
-    "from-openapi": "node adapters/openapi/from-openapi.mjs adapters/openapi/fixtures/orders.openapi.json",
+    "lint": "node skills/honest-arch-diagrams/scripts/lint.mjs",
+    "schema": "node skills/honest-arch-diagrams/scripts/schema.mjs",
+    "test": "node skills/honest-arch-diagrams/scripts/test.mjs",
+    "layout": "node skills/honest-arch-diagrams/scripts/layout.mjs examples/checkout-service.model.json --svg examples/checkout-service.layout.svg",
+    "from-k8s": "node skills/honest-arch-diagrams/adapters/k8s/from-k8s.mjs skills/honest-arch-diagrams/adapters/k8s/fixtures/checkout.k8s.json",
+    "from-terraform": "node skills/honest-arch-diagrams/adapters/terraform/from-terraform.mjs skills/honest-arch-diagrams/adapters/terraform/fixtures/orders-edge.tfshow.json",
+    "from-openapi": "node skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs skills/honest-arch-diagrams/adapters/openapi/fixtures/orders.openapi.json",
     "render": "d2 examples/checkout-service.d2 examples/checkout-service.svg"
   },
   "keywords": [

@@ -23,11 +23,12 @@ jobs:
           node-version: '20'
 
       # No dependencies: the whole pipeline is zero-dependency Node (18+).
+      # Tooling lives inside the skill package so `npx skills add` installs a complete unit.
       - name: Validate schema
-        run: node scripts/schema.mjs
+        run: node skills/honest-arch-diagrams/scripts/schema.mjs
 
       - name: Honesty lint
-        run: node scripts/lint.mjs
+        run: node skills/honest-arch-diagrams/scripts/lint.mjs
 
       - name: Golden tests
-        run: node scripts/test.mjs
+        run: node skills/honest-arch-diagrams/scripts/test.mjs

@@ -4,6 +4,19 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.7.0] — 2026-09-13
+
+### Added
+- Self-contained skill package: `scripts/`, `adapters/`, and `schema/` now live under
+  `skills/honest-arch-diagrams/` so `npx skills add` installs a complete unit.
+- Claude Code marketplace manifest (`.claude-plugin/marketplace.json`).
+- Restored marketplace install path and skills.sh badge in the README.
+- SKILL frontmatter: `license: MIT` and `metadata.version`.
+
+### Changed
+- Repo-root npm scripts and CI point at the skill-local tooling paths.
+- YAML OpenAPI support deferred to v0.8 (distribution-only release).
+
 ## [0.6.1] — 2026-09-13
 
 ### Added
@@ -60,6 +73,7 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - Initial skill: honesty rules, visual grammar, data model, D2 rendering guidance, and the
   checkout-service example.
 
+[0.7.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.7.0
 [0.6.1]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.6.1
 [0.6.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.6.0
 [0.5.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.5.0

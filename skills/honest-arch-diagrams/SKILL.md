@@ -5,6 +5,10 @@ description: >-
   reaches a service, or turning manifests/traces into an architecture sketch. Separates the
   verified path from inferred companions; never invents components. Not for C4, theming, or
   file inventories.
+license: MIT
+metadata:
+  author: Alberto Gonzalez
+  version: "0.7.0"
 ---
 
 # Honest architecture diagrams
@@ -36,7 +40,8 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 1. **Gather evidence.** From the description, repo, manifests, or telemetry, collect only
    facts: which hops are on the path, which dependencies have concrete evidence
    (env host, Secret *name*, ConfigMap host, declared server). Never read Secret values.
-   When a real source exists, skip hand-building and derive the model from it:
+   When a real source exists, skip hand-building and derive the model from it (paths are
+   relative to this skill directory):
    - Kubernetes: `kubectl get ingress,svc,endpoints,deploy -n <ns> -o json > d.json` then
      `node adapters/k8s/from-k8s.mjs d.json --out <app>.model.json`.
    - Terraform: `terraform show -json > t.json` then `node adapters/terraform/from-terraform.mjs t.json --out <app>.model.json`.
@@ -82,5 +87,5 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 
 ## Example
 
-`examples/checkout-service.model.json` → `examples/checkout-service.d2` (illustrative D2;
+See the repo's `examples/checkout-service.model.json` (illustrative D2 beside it;
 prefer `scripts/layout.mjs` for the grammar-exact SVG).
