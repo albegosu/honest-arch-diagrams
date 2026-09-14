@@ -92,6 +92,8 @@ const labelFor = (name) =>
 export function fromGitops(path, opts = {}) {
   const items = loadManifestItems(path);
   const model = fromK8s({ kind: 'List', items }, { app: opts.app, cap: opts.cap });
+  // Declared manifests are weaker than a live kubectl dump even though we reuse fromK8s.
+  model.evidenceStrength = 'declared';
 
   if (opts.valuesPath) {
     const text = readFileSync(opts.valuesPath, 'utf8');

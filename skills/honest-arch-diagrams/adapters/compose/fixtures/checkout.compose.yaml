@@ -1,0 +1,18 @@
+services:
+  checkout:
+    image: registry.example.com/checkout:1.4.2
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      REDIS_HOST: redis:6379
+      DATABASE_URL: postgres://checkout:secret@postgres:5432/checkout
+      APP_VERSION: "1.4.2"
+    ports:
+      - "8080:8080"
+  redis:
+    image: redis:7
+  postgres:
+    image: postgres:16
+  prometheus:
+    image: prom/prometheus:v2.0.0

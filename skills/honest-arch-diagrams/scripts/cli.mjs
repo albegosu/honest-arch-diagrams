@@ -22,12 +22,14 @@ const COMMANDS = {
   schema: join(here, 'schema.mjs'),
   layout: join(here, 'layout.mjs'),
   'to-d2': join(here, 'to-d2.mjs'),
+  diff: join(here, 'diff.mjs'),
   test: join(here, 'test.mjs'),
   'from-k8s': join(skillRoot, 'adapters/k8s/from-k8s.mjs'),
   'from-gitops': join(skillRoot, 'adapters/gitops/from-gitops.mjs'),
   'from-terraform': join(skillRoot, 'adapters/terraform/from-terraform.mjs'),
   'from-openapi': join(skillRoot, 'adapters/openapi/from-openapi.mjs'),
   'from-trace': join(skillRoot, 'adapters/trace/from-trace.mjs'),
+  'from-compose': join(skillRoot, 'adapters/compose/from-compose.mjs'),
 };
 
 function usage() {
@@ -40,12 +42,14 @@ Commands:
   schema          Validate model.json against the schema
   layout          Layout model.json (--svg out.svg)
   to-d2           Generate D2 from model.json
+  diff            Compare two model.json files
   test            Run golden tests
   from-k8s        Kubernetes dump → model
   from-gitops     GitOps/Helm manifests → model
   from-terraform  terraform show -json → model
   from-openapi    OpenAPI JSON/YAML → model
   from-trace      Trace / OTel JSON → model
+  from-compose    Docker Compose YAML → model
 `);
 }
 

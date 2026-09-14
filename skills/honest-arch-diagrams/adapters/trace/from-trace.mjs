@@ -232,7 +232,7 @@ export function fromTrace(input, opts = {}) {
     }
   }
 
-  const model = { app, hops, edges, companions, caps: { companions: cap } };
+  const model = { app, hops, edges, companions, caps: { companions: cap }, evidenceStrength: 'observed' };
   if (omitted > 0) model.overflow = { count: omitted, note: 'omitted after companion cap' };
   return model;
 }
