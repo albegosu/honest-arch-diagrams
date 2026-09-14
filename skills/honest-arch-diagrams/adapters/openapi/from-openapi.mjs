@@ -83,7 +83,7 @@ export function fromOpenApi(doc, opts = {}) {
     });
   }
 
-  const model = { app: title, hops, edges, companions, caps: { companions: cap } };
+  const model = { app: title, hops, edges, companions, caps: { companions: cap }, evidenceStrength: 'declared' };
   if (omitted > 0) model.overflow = { count: omitted, note: 'omitted after companion cap' };
   return model;
 }

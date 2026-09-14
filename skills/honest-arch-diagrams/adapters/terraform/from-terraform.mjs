@@ -129,6 +129,7 @@ export function fromTerraform(input, opts = {}) {
     app: opts.app || resources.find((r) => HOP_TYPES[r.type] === 'service')?.name || 'stack',
     hops, edges, companions,
     caps: { companions: cap },
+    evidenceStrength: 'infra',
   };
   if (omitted > 0) model.overflow = { count: omitted, note: 'omitted after companion cap' };
   return model;

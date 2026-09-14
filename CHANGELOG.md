@@ -4,15 +4,28 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.11.0] — 2026-09-14
 
-### Fixed
-- LICENSE copyright holder set to Alberto Gonzalez (was a placeholder).
+### Added
+- Optional top-level `evidenceStrength`: `observed` | `runtime` | `infra` | `declared` |
+  `manual`. Adapters set it (`from-trace` → observed, `from-k8s` → runtime,
+  `from-terraform` → infra, openapi/gitops/compose → declared). Hand-built models omit it.
 
 ### Changed
-- README restructured: 60-second path, adapter strength table, default render = layout SVG.
-- CONTRIBUTING expanded (setup, Conventional Commits, release version bump checklist).
-- Added SECURITY.md, CODE_OF_CONDUCT.md, and issue template contact links.
+- Schema, data-model, and honesty-rules document evidence strength ordering.
+
+## [0.10.0] — 2026-09-14
+
+### Added
+- Docker Compose adapter (`adapters/compose/from-compose.mjs`): one service hop; `depends_on`
+  / host-like env keys → linked; other services → around. Never invents edge/gateway hops.
+- `scripts/diff.mjs`: compare two models (added/removed/changed hops and companions);
+  `--json` / `--exit-code` for CI.
+- [`PUBLISHING.md`](PUBLISHING.md): skills.sh install, agentskill.sh claim + push webhook,
+  Claude plugin, release checklist.
+
+### Changed
+- CLI: `from-compose`, `diff`. README adapter table and compare section.
 
 ## [0.9.0] — 2026-09-13
 

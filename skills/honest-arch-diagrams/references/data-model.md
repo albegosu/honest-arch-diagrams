@@ -30,7 +30,8 @@ or a hand-built SVG.
     }
   ],
   "caps": { "companions": 8 },
-  "overflow": { "count": 2, "note": "omitted after companion cap" }  // optional
+  "overflow": { "count": 2, "note": "omitted after companion cap" },  // optional
+  "evidenceStrength": "runtime"   // optional — see below
 }
 ```
 
@@ -51,6 +52,17 @@ stack are `around` companions (or a second model), never a second spine in the s
   `{ "count": 5, "note": "omitted after companion cap" }`. Keep
   `companions.length <= caps.companions` and put the surplus in `overflow.count`. The layout
   draws a `+N more` card for it.
+- **`evidenceStrength`** (optional) is the strength of the *source* that produced the model:
+
+| Value | Typical producer |
+|---|---|
+| `observed` | `from-trace` |
+| `runtime` | `from-k8s` |
+| `infra` | `from-terraform` |
+| `declared` | `from-openapi`, `from-gitops`, `from-compose` |
+| `manual` | hand-built models (or omit the field) |
+
+Adapters set this field. Hand-built examples may omit it. Layout and to-d2 ignore it.
 
 ## Kinds → lane defaults
 

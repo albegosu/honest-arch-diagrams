@@ -235,6 +235,7 @@ export function fromK8s(input, opts = {}) {
     app: opts.app || svcName || 'app',
     hops, edges, companions,
     caps: { companions: cap },
+    evidenceStrength: 'runtime',
   };
   if (omitted > 0) model.overflow = { count: omitted, note: 'omitted after companion cap' };
   return model;

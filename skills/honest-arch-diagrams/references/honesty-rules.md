@@ -38,6 +38,10 @@ When a companion matches an "interesting" pattern (datastores, auth, observabili
 it as **detected** and keep its evidence string visible. The reader can dismiss a false
 positive. Better a dismissible card than a silent invention.
 
+Prefer stronger sources when several are available: observed (traces) > runtime (live k8s) >
+infra (Terraform) > declared (OpenAPI / GitOps / Compose). Optional model field
+`evidenceStrength` records that choice; it must not be used to invent hops.
+
 ## 5. Do not read secret values
 
 Companions may be discovered from Secret **names**, env/arg hosts, and ConfigMap hosts.

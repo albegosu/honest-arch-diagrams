@@ -16,8 +16,8 @@ diagrams**. It separates what is *verified* (the request path) from what is *inf
 Works with tools that support the `SKILL.md` standard: Claude Code, Cursor, Gemini CLI,
 GitHub Copilot CLI, OpenCode.
 
-**Latest:** [v0.9.0](https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.9.0) —
-trace adapter + `honest-arch` CLI.
+**Latest:** [v0.11.0](https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.11.0) —
+evidence strength on models; Compose + diff in v0.10.
 
 ## Install
 
@@ -93,8 +93,9 @@ node skills/honest-arch-diagrams/scripts/layout.mjs \
 | Honesty linter + JSON Schema | Rejects invented hops, path companions, over-cap |
 | `layout.mjs` | Default SVG: lanes, elbows, hop-arc |
 | `to-d2.mjs` | Optional themeable D2 |
+| `diff.mjs` | Compare two models (added/removed/changed) |
 | Evidence adapters | Derive the model from real sources (below) |
-| `honest-arch` CLI | One entry for lint / layout / to-d2 / from-* |
+| `honest-arch` CLI | One entry for lint / layout / to-d2 / diff / from-* |
 
 ## Evidence adapters
 
@@ -106,6 +107,7 @@ Strength varies; adapters do not inflate it.
 | **Trace / OTel** | Observed path (strongest) | Span JSON / OTel export | `from-trace` |
 | **Kubernetes** | Runtime config | `kubectl … -o json` | `from-k8s` |
 | **GitOps / Helm** | Declared cluster config | YAML/JSON manifests (+ optional values) | `from-gitops` |
+| **Compose** | Declared services | `docker-compose.yml` | `from-compose` |
 | **Terraform** | Infrastructure exists | `terraform show -json` | `from-terraform` |
 | **OpenAPI** | Declared contract (weakest) | OpenAPI 3.x JSON/YAML | `from-openapi` |
 
@@ -119,6 +121,9 @@ node skills/honest-arch-diagrams/scripts/cli.mjs from-k8s dump.json --app checko
 
 # GitOps
 node skills/honest-arch-diagrams/scripts/cli.mjs from-gitops ./manifests --app checkout --values values.yaml --out checkout.model.json
+
+# Compose
+node skills/honest-arch-diagrams/scripts/cli.mjs from-compose docker-compose.yml --app checkout --out checkout.model.json
 
 # Trace
 node skills/honest-arch-diagrams/scripts/cli.mjs from-trace trace.json --app checkout --out checkout.model.json
@@ -134,6 +139,15 @@ node skills/honest-arch-diagrams/scripts/cli.mjs layout checkout.model.json --sv
 
 Honesty guarantees shared by adapters: Secret/password **values** are never emitted; URL
 credentials are stripped; companions over the cap go to `overflow` (`+N more`).
+
+## Compare two models
+
+```bash
+node skills/honest-arch-diagrams/scripts/cli.mjs diff before.model.json after.model.json
+node skills/honest-arch-diagrams/scripts/cli.mjs diff before.model.json after.model.json --json --exit-code
+```
+
+Reports hops/companions added, removed, or changed. Does not invent topology.
 
 ## Validate
 
@@ -175,6 +189,7 @@ Details: [`skills/honest-arch-diagrams/references/honesty-rules.md`](skills/hone
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to change the skill safely |
 | [`SECURITY.md`](SECURITY.md) | How to report vulnerabilities |
 | [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | Community norms |
+| [`PUBLISHING.md`](PUBLISHING.md) | skills.sh / agentskill.sh webhook / releases |
 | [`skills/honest-arch-diagrams/SKILL.md`](skills/honest-arch-diagrams/SKILL.md) | Skill entry (agents read this) |
 
 ## Contributing

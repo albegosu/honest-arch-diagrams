@@ -8,9 +8,11 @@
 //
 // Usage: node scripts/test.mjs   (exit 0 = all pass, 1 = any failure)
 
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdtempSync } from 'node:fs';
 import { join, dirname } from 'node:path';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { lintModel } from './lint.mjs';
 import { layout } from './layout.mjs';
 import { validateSchema } from './schema.mjs';
@@ -19,9 +21,11 @@ import { fromTerraform } from '../adapters/terraform/from-terraform.mjs';
 import { fromOpenApi } from '../adapters/openapi/from-openapi.mjs';
 import { fromGitops } from '../adapters/gitops/from-gitops.mjs';
 import { fromTrace } from '../adapters/trace/from-trace.mjs';
+import { fromCompose } from '../adapters/compose/from-compose.mjs';
 import { toD2 } from './to-d2.mjs';
 import { parseJsonOrYaml } from './yaml.mjs';
-import { spawnSync } from 'node:child_process';
+import { diffModels } from './diff.mjs';
+
 const skillRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = join(skillRoot, '..', '..');
 let failures = 0;
@@ -335,6 +339,76 @@ check('cli --help exits 0', help.status === 0);
 check('cli --help lists from-trace', /from-trace/.test(help.stdout + help.stderr));
 const cliLint = spawnSync(process.execPath, [cliPath, 'lint', join(repoRoot, 'examples/checkout-from-trace.model.json')], { encoding: 'utf8' });
 check('cli lint checkout-from-trace passes', cliLint.status === 0, cliLint.stderr || cliLint.stdout);
+
+// --- 15. compose adapter ---
+console.log('# compose adapter');
+const composePath = join(skillRoot, 'adapters/compose/fixtures/checkout.compose.yaml');
+const composeDoc = parseJsonOrYaml(readFileSync(composePath, 'utf8'), composePath);
+const composeModel = fromCompose(composeDoc, { app: 'checkout' });
+check('compose output lints clean', lintModel(composeModel).length === 0, lintModel(composeModel).join('; '));
+check('compose has exactly one service hop', composeModel.hops.filter((h) => h.kind === 'service').length === 1);
+check('compose does not invent ingress/tls', !composeModel.hops.some((h) => h.kind === 'ingress' || h.kind === 'tls'));
+check('compose linked from depends_on', composeModel.companions.some((c) => c.relation === 'linked' && /depends_on redis/.test(c.evidence)));
+check('compose linked from depends_on postgres', composeModel.companions.some((c) => c.relation === 'linked' && /depends_on postgres/.test(c.evidence)));
+check('compose around includes prometheus', composeModel.companions.some((c) => c.relation === 'around' && /prometheus/i.test(c.label)));
+check('compose never emits APP_VERSION companion', !composeModel.companions.some((c) => /VERSION/i.test(c.id) || /VERSION/i.test(c.evidence)));
+check('compose never leaks DATABASE_URL password', !JSON.stringify(composeModel).includes('secret@'));
+
+// --- 16. diff models ---
+console.log('# diff models');
+const base = {
+  app: 'x',
+  hops: [{ id: 'svc', kind: 'service', label: 'x', lane: 'App', evidence: 'Service x' }],
+  edges: [],
+  companions: [
+    { id: 'redis', kind: 'db', label: 'Redis', relation: 'linked', evidence: 'env REDIS_HOST', subtitle: 'uses', anchor: 'svc' },
+  ],
+  caps: { companions: 8 },
+};
+const withHop = {
+  ...base,
+  hops: [
+    ...base.hops,
+    { id: 'dns', kind: 'dns', label: 'x.example.com', lane: 'Edge', evidence: 'DNS' },
+  ],
+};
+const flipped = {
+  ...base,
+  companions: [
+    { id: 'redis', kind: 'db', label: 'Redis', relation: 'around', evidence: 'compose file', subtitle: 'release' },
+  ],
+};
+const dAdd = diffModels(base, withHop);
+const dRel = diffModels(base, flipped);
+const dSame = diffModels(base, structuredClone(base));
+check('diff detects added hop', dAdd.hops.added.some((h) => h.id === 'dns') && !dAdd.identical);
+check('diff detects companion relation change', dRel.companions.changed.some((c) => c.id === 'redis') && !dRel.identical);
+check('diff identical models', dSame.identical);
+const tmp = mkdtempSync(join(tmpdir(), 'honest-arch-diff-'));
+const p1 = join(tmp, 'a.json');
+const p2 = join(tmp, 'b.json');
+writeFileSync(p1, JSON.stringify(base));
+writeFileSync(p2, JSON.stringify(withHop));
+const diffCli = spawnSync(process.execPath, [join(skillRoot, 'scripts/diff.mjs'), p1, p2, '--exit-code'], { encoding: 'utf8' });
+check('diff --exit-code is 1 when different', diffCli.status === 1);
+const diffSame = spawnSync(process.execPath, [join(skillRoot, 'scripts/diff.mjs'), p1, p1, '--exit-code'], { encoding: 'utf8' });
+check('diff --exit-code is 0 when identical', diffSame.status === 0);
+check('cli --help lists from-compose and diff', /from-compose/.test(help.stdout + help.stderr) && /diff/.test(help.stdout + help.stderr));
+
+// --- 17. evidenceStrength (adapters stamp source strength) ---
+console.log('# evidenceStrength');
+check('k8s sets runtime', fromK8s(fixture).evidenceStrength === 'runtime');
+check('trace sets observed', fromTrace(traceFix, { app: 'checkout' }).evidenceStrength === 'observed');
+check('terraform sets infra', fromTerraform(tfDump).evidenceStrength === 'infra');
+check('openapi sets declared', fromOpenApi(oapiDoc).evidenceStrength === 'declared');
+check('compose sets declared', fromCompose(composeDoc, { app: 'checkout' }).evidenceStrength === 'declared');
+check('gitops overrides to declared', fromGitops(join(gitopsDir, 'manifests.yaml'), { app: 'checkout' }).evidenceStrength === 'declared');
+check(
+  'manual models without strength still lint',
+  lintModel(checkoutModel).length === 0,
+);
+const badStrength = { ...spine(), evidenceStrength: 'invented' };
+check('schema rejects unknown evidenceStrength', validateSchema(badStrength).length > 0);
 
 console.log(`\n${failures === 0 ? 'PASS' : 'FAIL'} — ${failures} failing check(s).`);
 process.exit(failures === 0 ? 0 : 1);

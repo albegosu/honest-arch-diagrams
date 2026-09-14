@@ -38,6 +38,11 @@
         "count": { "type": "integer", "minimum": 1 },
         "note": { "type": "string", "minLength": 1 }
       }
+    },
+    "evidenceStrength": {
+      "type": "string",
+      "enum": ["observed", "runtime", "infra", "declared", "manual"],
+      "description": "Optional. How strong the source of this model is. Adapters set it; hand-built models omit it or use manual."
     }
   },
   "$defs": {

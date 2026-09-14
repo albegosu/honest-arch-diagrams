@@ -96,6 +96,16 @@ around them, never at their expense.
   only with shared `k8s.namespace.name`.
 - `scripts/cli.mjs` / bin `honest-arch`: one entry for lint, layout, to-d2, test, from-*.
 
+## v0.10 — Compose + diff + publishing ✅
+- `adapters/compose/from-compose.mjs`: docker-compose → model (declared services only).
+- `scripts/diff.mjs`: compare two models without inventing topology.
+- `PUBLISHING.md`: agentskill.sh webhook (`https://agentskill.sh/api/webhooks/github` on
+  push) + release checklist.
+
+## v0.11 — Evidence strength ✅
+- Optional top-level `evidenceStrength` on the model; adapters set it
+  (observed / runtime / infra / declared).
+
 ## How to contribute
 See [`CONTRIBUTING.md`](CONTRIBUTING.md). New lane kinds or evidence sources are welcome as
 long as they keep the observed-vs-inferred split explicit. Open an issue describing the

@@ -8,7 +8,7 @@ description: >-
 license: MIT
 metadata:
   author: Alberto Gonzalez
-  version: "0.9.0"
+  version: "0.11.0"
 ---
 
 # Honest architecture diagrams
@@ -65,7 +65,8 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
    - Terraform: `terraform show -json > t.json` then `node adapters/terraform/from-terraform.mjs t.json --app <name> --out <app>.model.json`.
    - OpenAPI (JSON or YAML): `node adapters/openapi/from-openapi.mjs <spec>.json|.yaml --out <app>.model.json`.
    - Traces (OTel JSON or simplified spans): `node adapters/trace/from-trace.mjs <trace.json> --app <name> --out <app>.model.json`.
-   Or use the unified CLI: `node scripts/cli.mjs from-trace <trace.json> --app <name>`.
+   - Docker Compose: `node adapters/compose/from-compose.mjs <compose.yaml> --app <name> --out <app>.model.json`.
+   Or use the unified CLI: `node scripts/cli.mjs from-compose <compose.yaml> --app <name>`.
    Each source carries different evidence strength (runtime trace/k8s > infrastructure >
    declared); keep that in mind when reading the result.
 2. **Build the model.** Fill `{ hops[], edges[], companions[] }` per
@@ -114,7 +115,9 @@ its evidence. See `references/honesty-rules.md` — this is the core of the skil
 - `adapters/terraform/from-terraform.mjs` — derive from `terraform show -json` (around by default, linked on reference).
 - `adapters/openapi/from-openapi.mjs` — derive from an OpenAPI 3.x JSON or YAML document (declared `x-depends-on` only).
 - `adapters/trace/from-trace.mjs` — derive from OpenTelemetry / span JSON (observed path).
-- `scripts/cli.mjs` — unified `honest-arch` entry (`lint`, `layout`, `to-d2`, `from-*`).
+- `adapters/compose/from-compose.mjs` — derive from docker-compose.yml (declared services).
+- `scripts/diff.mjs` — compare two models (added/removed/changed).
+- `scripts/cli.mjs` — unified `honest-arch` entry (`lint`, `layout`, `to-d2`, `diff`, `from-*`).
 
 ## Example
 
