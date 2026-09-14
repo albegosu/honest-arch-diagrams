@@ -40,6 +40,12 @@ Marketplace manifest: [`.claude-plugin/marketplace.json`](.claude-plugin/marketp
 Bump `metadata.version` / plugin `version` in that file together with `package.json` and
 SKILL frontmatter when cutting a release.
 
+## Social preview
+
+Upload [`examples/social/og-banner.png`](examples/social/og-banner.png) (or
+`og-preview.png`) under GitHub → **Settings → General → Social preview**.
+Launch assets and regenerate commands: [`examples/social/README.md`](examples/social/README.md).
+
 ## Cutting a release
 
 ```bash

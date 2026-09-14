@@ -85,6 +85,22 @@ node skills/honest-arch-diagrams/scripts/layout.mjs \
 
 ![Grammar-exact layout: Postgres and Redis in the Data band under Workload](examples/checkout-service.layout.png)
 
+## Share (before / after)
+
+LLM diagrams invent hops. This skill refuses. Side-by-side and GIF live in
+[`examples/social/`](examples/social/):
+
+| Asset | For |
+|---|---|
+| [`before-after-side.png`](examples/social/before-after-side.png) | LinkedIn / static |
+| [`before-after.gif`](examples/social/before-after.gif) | X / animation |
+| [`og-banner.png`](examples/social/og-banner.png) | GitHub social preview |
+
+![Before invented vs after honest](examples/social/before-after-side.png)
+
+Regenerate with the commands in [`examples/social/README.md`](examples/social/README.md)
+(`d2` + `ffmpeg`).
+
 ## What it does
 
 | Piece | Role |
