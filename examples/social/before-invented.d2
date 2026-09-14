@@ -1,0 +1,26 @@
+# BEFORE — compact "invented" diagram for social posts.
+
+direction: down
+
+title: |md
+  **BEFORE — invented**
+|
+
+cdn: Cloudflare / WAF
+alb: ALB + TLS
+mesh: Istio / Envoy
+apigw: API Gateway
+auth: Cognito + oauth2-proxy + JWT
+checkout: checkout
+cart: cart-service
+pg: Postgres
+redis: Redis
+kafka: Kafka
+es: Elasticsearch
+prom: Prometheus
+
+cdn -> alb -> mesh -> apigw -> auth -> checkout -> cart -> pg
+checkout -> redis
+checkout -> kafka
+checkout -> es
+checkout -> prom

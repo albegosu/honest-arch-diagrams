@@ -1,0 +1,52 @@
+# AFTER — compact honest diagram for social posts.
+
+direction: right
+
+vars: {
+  accent: "#2563eb"
+}
+
+title: |md
+  **AFTER — honest**
+|
+
+Edge: Edge {
+  dns: checkout.example.com
+  tls: TLS
+}
+
+Gateway: Gateway {
+  ingress: Ingress
+}
+
+Identity: Identity {
+  oauth: oauth2-proxy
+}
+
+App: App {
+  svc: checkout
+}
+
+Workload: Workload {
+  pod: pod
+}
+
+Data: Data {
+  pg: Postgres
+  redis: Redis
+}
+
+Release: "Also in release" {
+  style: { stroke-dash: 4 }
+  prom: Prometheus
+}
+
+Edge.dns -> Edge.tls -> Gateway.ingress -> Identity.oauth -> App.svc -> Workload.pod: {
+  style: { stroke: ${accent}; stroke-width: 2 }
+}
+
+App.svc -> Data.pg: "uses (secret)" { style: { stroke-dash: 3 } }
+App.svc -> Data.redis: "uses (env)" { style: { stroke-dash: 3 } }
+Data.pg.style.stroke-dash: 3
+Data.redis.style.stroke-dash: 3
+Release.prom.style.stroke-dash: 3
