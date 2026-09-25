@@ -3,6 +3,7 @@
 [![CI](https://github.com/albegosu/honest-arch-diagrams/actions/workflows/ci.yml/badge.svg)](https://github.com/albegosu/honest-arch-diagrams/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/albegosu/honest-arch-diagrams)](https://github.com/albegosu/honest-arch-diagrams/releases)
 [![skills.sh](https://skills.sh/b/albegosu/honest-arch-diagrams)](https://skills.sh/albegosu/honest-arch-diagrams)
+[![npm](https://img.shields.io/npm/v/honest-arch-diagrams)](https://www.npmjs.com/package/honest-arch-diagrams)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 An [Agent Skill](https://agentskills.io) for **honest service-topology / request-path
@@ -13,6 +14,8 @@ diagrams**. It separates what is *verified* (the request path) from what is *inf
 > TLS hop, and an auth gateway it never saw. A confident wrong diagram is worse than none.
 > This skill makes the agent draw only what it can evidence, and label the rest as inferred.
 
+![Before: an LLM diagram with invented hops. After: the honest request path with labeled companions](examples/social/before-after-side.png)
+
 Works with tools that support the `SKILL.md` standard: Claude Code, Cursor, Gemini CLI,
 GitHub Copilot CLI, OpenCode.
 
@@ -21,12 +24,27 @@ evidence strength on models; Compose + diff in v0.10.
 
 ## Install
 
+**As an agent skill** — via [skills.sh](https://skills.sh):
+
 ```bash
 npx skills add albegosu/honest-arch-diagrams
+
+# global, one agent, no prompts
+npx skills add albegosu/honest-arch-diagrams -g -a claude-code -y
 ```
 
 That installs the full package under `skills/honest-arch-diagrams/` (`SKILL.md`, references,
-scripts, adapters, schema).
+scripts, adapters, schema). Your agent reads `SKILL.md` and uses the bundled tooling.
+
+**As a CLI** — via npm (Node 18+, zero dependencies, no install needed):
+
+```bash
+npx honest-arch-diagrams --help
+npx honest-arch-diagrams lint checkout.model.json
+```
+
+Prefer a global install? `npm i -g honest-arch-diagrams` gives you `honest-arch <command>` and
+`honest-arch-lint <model.json>` (same CLI, shorter names).
 
 <details>
 <summary>Claude Code plugin / manual copy</summary>
@@ -51,7 +69,15 @@ cp -r honest-arch-diagrams/skills/honest-arch-diagrams .github/skills/   # GitHu
 
 ## 60-second path
 
-From a clone (Node 18+, zero npm deps):
+On your own repo, no clone (Node 18+):
+
+```bash
+npx honest-arch-diagrams from-compose docker-compose.yml --app checkout --out checkout.model.json
+npx honest-arch-diagrams lint checkout.model.json
+npx honest-arch-diagrams layout checkout.model.json --svg checkout.svg
+```
+
+From a clone (zero npm deps):
 
 ```bash
 npm test
@@ -87,15 +113,14 @@ node skills/honest-arch-diagrams/scripts/layout.mjs \
 
 ## Share (before / after)
 
-LLM diagrams invent hops. This skill refuses.
+LLM diagrams invent hops. This skill refuses. The side-by-side at the top of this README and
+the launch assets live in [`examples/social/`](examples/social/):
 
 | Asset | For |
 |---|---|
 | [`before-after-side.png`](examples/social/before-after-side.png) | LinkedIn / static |
 | [`before-after.mp4`](examples/social/before-after.mp4) | X (sharp video — prefer over GIF) |
 | [`og-card.png`](examples/social/og-card.png) | GitHub social preview |
-
-![Before invented vs after honest](examples/social/before-after-side.png)
 
 Regen: [`examples/social/README.md`](examples/social/README.md).
 
@@ -109,7 +134,7 @@ Regen: [`examples/social/README.md`](examples/social/README.md).
 | `to-d2.mjs` | Optional themeable D2 |
 | `diff.mjs` | Compare two models (added/removed/changed) |
 | Evidence adapters | Derive the model from real sources (below) |
-| `honest-arch` CLI | One entry for lint / layout / to-d2 / diff / from-* |
+| `honest-arch` CLI (`npx honest-arch-diagrams`) | One entry for lint / layout / to-d2 / diff / from-* |
 
 ## Evidence adapters
 
@@ -126,7 +151,9 @@ Strength varies; adapters do not inflate it.
 | **OpenAPI** | Declared contract (weakest) | OpenAPI 3.x JSON/YAML | `from-openapi` |
 
 Paths below are from the repo root. Inside an installed skill, drop the
-`skills/honest-arch-diagrams/` prefix. Always pass `--app <name>` on multi-service inputs.
+`skills/honest-arch-diagrams/` prefix. With npm, replace
+`node skills/honest-arch-diagrams/scripts/cli.mjs` with `npx honest-arch-diagrams`. Always pass
+`--app <name>` on multi-service inputs.
 
 ```bash
 # Kubernetes
@@ -203,7 +230,7 @@ Details: [`skills/honest-arch-diagrams/references/honesty-rules.md`](skills/hone
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to change the skill safely |
 | [`SECURITY.md`](SECURITY.md) | How to report vulnerabilities |
 | [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) | Community norms |
-| [`PUBLISHING.md`](PUBLISHING.md) | skills.sh / agentskill.sh webhook / releases |
+| [`PUBLISHING.md`](PUBLISHING.md) | skills.sh / npm / agentskill.sh webhook / releases |
 | [`skills/honest-arch-diagrams/SKILL.md`](skills/honest-arch-diagrams/SKILL.md) | Skill entry (agents read this) |
 
 ## Contributing

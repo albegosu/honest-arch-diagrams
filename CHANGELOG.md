@@ -4,6 +4,33 @@ All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+Distribution release: no new diagram features.
+
+### Added
+- npm package: `npx honest-arch-diagrams <command>` runs the CLI with no install. New bin alias
+  `honest-arch-diagrams` (matches the package name); `honest-arch` and `honest-arch-lint` are
+  unchanged. A `files` whitelist ships only the skill package, the example models and this
+  changelog (~50 kB, 41 files).
+- README **Install** section: skills.sh (`npx skills add`, incl. `-g -a claude-code -y`), npm /
+  `npx`, Claude Code plugin, manual copy. The 60-second path starts with `npx` on your own
+  `docker-compose.yml`.
+- Launch visuals in `examples/social/`: sharp before/after PNG (`compose-social.py`), MP4 for
+  X, and a GitHub social preview card (`og-card.html` → `og-card.png`).
+- `PUBLISHING.md`: npm section (tarball contents, pre-publish checks, tarball smoke test).
+
+### Fixed
+- Bins did nothing when run through npm's symlinks (`node_modules/.bin`, the npx cache):
+  `honest-arch-lint model.json` exited 0 without linting. Entry-point detection now compares
+  real paths (`scripts/is-main.mjs`), which also covers paths with spaces and Windows drive
+  letters. Golden tests run `honest-arch-lint` and `honest-arch` through a symlink.
+- README before/after image was broken on GitHub (the PNG was git-ignored).
+
+### Changed
+- Every script with a node shebang is executable; `prepublishOnly` runs `npm test`.
+- Social: the soft GIF is replaced by an H.264 MP4.
+
 ## [0.11.0] — 2026-09-14
 
 ### Added
@@ -130,6 +157,11 @@ Versions follow [Semantic Versioning](https://semver.org/).
 - Initial skill: honesty rules, visual grammar, data model, D2 rendering guidance, and the
   checkout-service example.
 
+[Unreleased]: https://github.com/albegosu/honest-arch-diagrams/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.11.0
+[0.10.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.10.0
+[0.9.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.9.0
+[0.8.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.8.0
 [0.7.1]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.7.1
 [0.7.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.7.0
 [0.6.1]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.6.1
