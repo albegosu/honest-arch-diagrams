@@ -12,6 +12,7 @@
 # Node / tooling
 node_modules/
 dist/
+*.tgz
 .DS_Store
 
 # Editor

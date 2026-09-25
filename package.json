@@ -3,14 +3,21 @@
   "version": "0.11.0",
   "description": "Agent skill: honest service-topology / request-path diagrams. Verified path vs inferred companions, never hallucinate components.",
   "license": "MIT",
+  "author": "Alberto Gonzalez",
   "engines": {
     "node": ">=18"
   },
   "type": "module",
   "bin": {
-    "honest-arch-lint": "skills/honest-arch-diagrams/scripts/lint.mjs",
-    "honest-arch": "skills/honest-arch-diagrams/scripts/cli.mjs"
+    "honest-arch-diagrams": "skills/honest-arch-diagrams/scripts/cli.mjs",
+    "honest-arch": "skills/honest-arch-diagrams/scripts/cli.mjs",
+    "honest-arch-lint": "skills/honest-arch-diagrams/scripts/lint.mjs"
   },
+  "files": [
+    "skills/honest-arch-diagrams/",
+    "examples/*.model.json",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "lint": "node skills/honest-arch-diagrams/scripts/lint.mjs",
     "schema": "node skills/honest-arch-diagrams/scripts/schema.mjs",
@@ -26,7 +33,8 @@
     "from-openapi": "node skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs skills/honest-arch-diagrams/adapters/openapi/fixtures/orders.openapi.json",
     "from-openapi-yaml": "node skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs skills/honest-arch-diagrams/adapters/openapi/fixtures/orders.openapi.yaml",
     "from-trace": "node skills/honest-arch-diagrams/adapters/trace/from-trace.mjs skills/honest-arch-diagrams/adapters/trace/fixtures/checkout.trace.json --app checkout",
-    "render": "d2 examples/checkout-service.d2 examples/checkout-service.svg"
+    "render": "d2 examples/checkout-service.d2 examples/checkout-service.svg",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
     "agent-skills",
