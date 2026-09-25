@@ -1,0 +1,108 @@
+<!doctype html>
+<!--
+  GitHub / social preview card (1280×640). Renders the real layout SVG.
+  Regenerate from the repo root:
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
+      --window-size=1280,640 --force-device-scale-factor=1 \
+      --screenshot=examples/social/og-card.png examples/social/og-card.html
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<title>honest-arch-diagrams — social preview</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --ink: #f8fafc;
+    --muted: #94a3b8;
+    --dim: #64748b;
+    --blue: #3b82f6;
+    --line: #1e293b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    background:
+      radial-gradient(900px 420px at 88% -10%, rgba(59,130,246,.22), transparent 60%),
+      linear-gradient(rgba(148,163,184,.06) 1px, transparent 1px) 0 0 / 32px 32px,
+      linear-gradient(90deg, rgba(148,163,184,.06) 1px, transparent 1px) 0 0 / 32px 32px,
+      var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    position: relative;
+  }
+  .header {
+    position: absolute; left: 48px; right: 48px; top: 36px; height: 158px;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 40px;
+  }
+  .eyebrow {
+    font: 600 13px/1 "SF Mono", Menlo, monospace; letter-spacing: .14em;
+    color: var(--blue); text-transform: uppercase;
+  }
+  .eyebrow span { color: var(--dim); }
+  h1 {
+    margin-top: 14px; font-size: 54px; line-height: 1; font-weight: 800; letter-spacing: -.025em;
+  }
+  h1 em { font-style: normal; color: var(--blue); }
+  .lede {
+    margin-top: 14px; font-size: 23px; line-height: 1.3; color: #cbd5e1; font-weight: 500;
+  }
+  .rules { list-style: none; margin-top: 8px; width: 390px; }
+  .rules li {
+    display: grid; grid-template-columns: 46px 1fr; align-items: center;
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+    font-size: 16px; color: var(--ink); font-weight: 600;
+  }
+  .rules li:last-child { border-bottom: 0; }
+  .rules small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+  .glyph { width: 32px; height: 0; }
+  .g-verified { border-top: 3px solid var(--blue); }
+  .g-inferred { border-top: 3px dashed #94a3b8; }
+  .g-never {
+    width: 22px; height: 22px; border: 2.5px solid #f87171; border-radius: 50%; position: relative; margin-left: 5px;
+  }
+  .g-never::after {
+    content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2.5px;
+    background: #f87171; transform: translateX(-50%) rotate(45deg);
+  }
+  .panel {
+    position: absolute; left: 48px; right: 48px; top: 212px; height: 362px;
+    background: #fff; border-radius: 16px; padding: 10px 16px;
+    box-shadow: 0 0 0 1px rgba(148,163,184,.25), 0 24px 60px -20px rgba(0,0,0,.6);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .panel img { max-width: 100%; max-height: 100%; display: block; }
+  .footer {
+    position: absolute; left: 48px; right: 48px; bottom: 22px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 15px; color: var(--muted);
+  }
+  .cmd { font: 500 15px/1 "SF Mono", Menlo, monospace; color: #e2e8f0; }
+  .cmd b { color: var(--blue); font-weight: 600; }
+  .adapters b { color: #e2e8f0; font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="eyebrow">Agent Skill <span>· SKILL.md · v0.11.0</span></div>
+      <h1>honest-arch-<em>diagrams</em></h1>
+      <p class="lede">Architecture diagrams that only draw<br>what they can prove.</p>
+    </div>
+    <ul class="rules">
+      <li><i class="glyph g-verified"></i><div>Verified path<small>every hop backed by evidence</small></div></li>
+      <li><i class="glyph g-inferred"></i><div>Inferred companions<small>dashed, evidence on the edge</small></div></li>
+      <li><i class="glyph g-never"></i><div>Never invented<small>omitted means absent, not guessed</small></div></li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <img src="../checkout-service.layout.svg" alt="">
+  </div>
+
+  <div class="footer">
+    <div class="cmd"><b>$</b> npx skills add albegosu/honest-arch-diagrams</div>
+    <div class="adapters">from <b>trace · k8s · gitops · compose · terraform · openapi</b></div>
+  </div>
+</body>
+</html>

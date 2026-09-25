@@ -40,6 +40,9 @@ npm test
 ```
 
 Before opening a PR, run `npm test` and fix every failure. Do not use `--no-verify`.
+If you touch `package.json`, bins, or the file layout, also run `npm pack --dry-run` and check
+that the tarball still ships only the skill package, `examples/*.model.json` and
+`CHANGELOG.md` (see [`PUBLISHING.md`](PUBLISHING.md#npm-cli)).
 
 ## Branch and commits
 

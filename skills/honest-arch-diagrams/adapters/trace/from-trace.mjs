@@ -19,6 +19,7 @@
 //   node adapters/trace/from-trace.mjs <trace.json> [--app <name>] [--out <model.json>]
 
 import { readFileSync, writeFileSync } from 'node:fs';
+import { isMain } from '../../scripts/is-main.mjs';
 
 const slug = (s) =>
   String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'x';
@@ -256,4 +257,4 @@ function main() {
   console.log(json);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (isMain(import.meta.url)) main();

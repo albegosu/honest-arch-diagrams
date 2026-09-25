@@ -13,6 +13,7 @@
 // See references/layout.md and references/visual-grammar.md.
 
 import { readFileSync, writeFileSync } from 'node:fs';
+import { isMain } from './is-main.mjs';
 
 // --- constants (references/layout.md) ---
 const NODE_W = 148;
@@ -283,4 +284,4 @@ function main() {
 }
 
 // Run only when invoked directly.
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (isMain(import.meta.url)) main();

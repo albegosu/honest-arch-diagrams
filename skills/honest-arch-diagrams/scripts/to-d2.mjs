@@ -6,6 +6,7 @@
 //   node scripts/to-d2.mjs <model.json> [--out <file.d2>]
 
 import { readFileSync, writeFileSync } from 'node:fs';
+import { isMain } from './is-main.mjs';
 
 const ACCENT = '#2563eb';
 const d2Id = (id) => String(id).replace(/[^a-zA-Z0-9_]/g, '_');
@@ -124,4 +125,4 @@ function main() {
   process.stdout.write(d2);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (isMain(import.meta.url)) main();
