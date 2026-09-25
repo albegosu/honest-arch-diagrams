@@ -12,6 +12,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { validateSchema } from './schema.mjs';
+import { isMain } from './is-main.mjs';
 
 const HOP_KINDS = new Set([
   'dns', 'lb', 'tls', 'ingress', 'httproute', 'oauth2_proxy', 'service', 'endpoints', 'pod',
@@ -146,4 +147,4 @@ function main() {
 }
 
 // Run only when invoked directly.
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (isMain(import.meta.url)) main();

@@ -11,6 +11,7 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isMain } from './is-main.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const SCHEMA = JSON.parse(readFileSync(join(here, '..', 'schema', 'model.schema.json'), 'utf8'));
@@ -108,4 +109,4 @@ function main() {
   console.log(`\nAll ${targets.length} model(s) match the schema.`);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (isMain(import.meta.url)) main();

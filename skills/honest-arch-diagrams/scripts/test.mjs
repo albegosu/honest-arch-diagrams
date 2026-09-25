@@ -8,7 +8,7 @@
 //
 // Usage: node scripts/test.mjs   (exit 0 = all pass, 1 = any failure)
 
-import { readFileSync, readdirSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdtempSync, symlinkSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -409,6 +409,28 @@ check(
 );
 const badStrength = { ...spine(), evidenceStrength: 'invented' };
 check('schema rejects unknown evidenceStrength', validateSchema(badStrength).length > 0);
+
+// --- 18. npm bin symlinks still run main() ---
+// npm links bins as symlinks (node_modules/.bin, the npx cache). A naive
+// import.meta.url === file://argv[1] guard exits 0 without doing anything there.
+console.log('# bin symlinks');
+const binDir = mkdtempSync(join(tmpdir(), 'honest-arch-bin-'));
+const exampleModel = join(repoRoot, 'examples/checkout-service.model.json');
+for (const [name, target] of [
+  ['honest-arch-lint', 'scripts/lint.mjs'],
+  ['honest-arch', 'scripts/cli.mjs'],
+]) {
+  const link = join(binDir, name);
+  try {
+    symlinkSync(join(skillRoot, target), link);
+  } catch {
+    console.log(`  skip - ${name} symlink (not supported on this filesystem)`);
+    continue;
+  }
+  const args = name === 'honest-arch' ? [link, 'lint', exampleModel] : [link, exampleModel];
+  const r = spawnSync(process.execPath, args, { encoding: 'utf8' });
+  check(`${name} via symlink lints the example`, r.status === 0 && /PASS/.test(r.stdout), r.stderr || r.stdout || 'no output');
+}
 
 console.log(`\n${failures === 0 ? 'PASS' : 'FAIL'} — ${failures} failing check(s).`);
 process.exit(failures === 0 ? 0 : 1);

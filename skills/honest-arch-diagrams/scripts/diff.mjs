@@ -8,6 +8,7 @@
 //       2 = usage / parse error.
 
 import { readFileSync } from 'node:fs';
+import { isMain } from './is-main.mjs';
 
 const HOP_FIELDS = ['kind', 'label', 'lane', 'evidence'];
 const COMPANION_FIELDS = ['kind', 'label', 'relation', 'evidence', 'anchor', 'subtitle'];
@@ -129,4 +130,4 @@ function main() {
   process.exit(0);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main();
+if (isMain(import.meta.url)) main();
