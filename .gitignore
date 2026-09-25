@@ -5,6 +5,9 @@
 # Keep the committed example renders
 !examples/*.svg
 !examples/*.png
+# Keep the final launch visuals (intermediate renders stay ignored)
+!examples/social/before-after-side.png
+!examples/social/og-card.png
 
 # Node / tooling
 node_modules/

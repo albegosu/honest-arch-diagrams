@@ -42,8 +42,8 @@ SKILL frontmatter when cutting a release.
 
 ## Social preview
 
-Upload [`examples/social/og-banner.png`](examples/social/og-banner.png) (or
-`og-preview.png`) under GitHub → **Settings → General → Social preview**.
+Upload [`examples/social/og-card.png`](examples/social/og-card.png) under GitHub →
+**Settings → General → Social preview**.
 Launch assets and regenerate commands: [`examples/social/README.md`](examples/social/README.md).
 
 ## Cutting a release

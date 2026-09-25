@@ -1,28 +1,26 @@
 # Social / launch visuals
 
-Assets for X, LinkedIn, and GitHub social preview. Source of truth is the `.d2` files;
-PNG/GIF are rendered outputs.
+Assets for X, LinkedIn, and the GitHub social preview. Source of truth is the `.d2` files
+and `og-card.html`; the PNG/MP4 are rendered outputs (only the final ones are committed).
 
-## Tools used
+**Skip GIF.** Use the sharp PNG or MP4.
+
+## Use these
+
+| File | Platform |
+|---|---|
+| [`before-after-side.png`](before-after-side.png) | README, LinkedIn static, X still (2400×1350) |
+| [`before-after.mp4`](before-after.mp4) | X video (same side-by-side, 5s hold, H.264) |
+| [`og-card.png`](og-card.png) | GitHub social preview (1280×640) |
+
+## Tools
 
 | Tool | Role |
 |---|---|
-| [d2](https://d2lang.com) (`brew install d2`) | Diagram → PNG |
-| [ffmpeg](https://ffmpeg.org) (`brew install ffmpeg`) | Side-by-side, GIF, canvas pad |
-| `sips` (macOS) | Resize |
-| Cursor GenerateImage | Optional branded OG banner |
-
-## Files
-
-| File | Use |
-|---|---|
-| `before-invented.d2` / `.png` | Hallucinated “complete” diagram |
-| `after-honest.d2` / `.png` | Honest request-path (accent + dashed companions) |
-| `slide-before.png` / `slide-after.png` | 1280×720 slides |
-| `before-after-side.png` | Static before\|after for LinkedIn |
-| `before-after.gif` | Alternating GIF for X |
-| `og-preview.png` | 1280×640 GitHub social preview candidate |
-| `og-banner.png` | Branded 16:9 banner (title + install line) |
+| [d2](https://d2lang.com) | Invented + honest diagrams → PNG (`--scale 2`) |
+| Pillow (`compose-social.py`) | Labeled before\|after 16:9 (no qlmanage blur) |
+| Headless Chrome (`og-card.html`) | OG card around the real `checkout-service.layout.svg` |
+| ffmpeg | Still → MP4 for X |
 
 ## Regenerate
 
@@ -30,35 +28,32 @@ PNG/GIF are rendered outputs.
 cd "$(git rev-parse --show-toplevel)"
 export PATH="/opt/homebrew/bin:$PATH"
 
-d2 --pad 24 --scale 0.55 examples/social/before-invented.d2 examples/social/before-invented.png
-d2 --pad 24 --scale 0.55 examples/social/after-honest.d2 examples/social/after-honest.png
+# 1. Before / after panels (intermediate PNGs, git-ignored)
+d2 --pad 40 --scale 2.0 examples/social/before-invented.d2 examples/social/before-invented.png
+d2 --pad 40 --scale 2.0 examples/social/after-honest.d2 examples/social/after-honest.png
 
-sips -Z 1000 examples/social/before-invented.png --out /tmp/ha-before.png >/dev/null
-sips -Z 1000 examples/social/after-honest.png --out /tmp/ha-after.png >/dev/null
+# 2. Side-by-side PNG (Pillow)
+python3 -m venv /tmp/had-social-venv
+/tmp/had-social-venv/bin/pip install -q Pillow
+/tmp/had-social-venv/bin/python examples/social/compose-social.py
 
-ffmpeg -y -update 1 -i /tmp/ha-before.png \
-  -vf "scale=1180:620:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:white" \
-  examples/social/slide-before.png
-ffmpeg -y -update 1 -i /tmp/ha-after.png \
-  -vf "scale=1180:620:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:white" \
-  examples/social/slide-after.png
-ffmpeg -y -update 1 -i examples/social/slide-before.png -i examples/social/slide-after.png \
-  -filter_complex "[0:v]scale=640:720[l];[1:v]scale=640:720[r];[l][r]hstack=inputs=2" \
-  examples/social/before-after-side.png
-ffmpeg -y -loop 1 -t 2.2 -i examples/social/slide-before.png -loop 1 -t 2.2 -i examples/social/slide-after.png \
-  -filter_complex "[0:v][1:v]concat=n=2:v=1:a=0,fps=8,split[s0][s1];[s0]palettegen=max_colors=96[p];[s1][p]paletteuse=dither=bayer" \
-  -loop 0 examples/social/before-after.gif
-ffmpeg -y -update 1 -i examples/social/before-after-side.png \
-  -vf "scale=1280:640:force_original_aspect_ratio=decrease,pad=1280:640:(ow-iw)/2:(oh-ih)/2:white" \
-  examples/social/og-preview.png
+# 3. MP4 for X
+ffmpeg -y -loop 1 -t 5 -i examples/social/before-after-side.png \
+  -vf "fps=30,format=yuv420p" -c:v libx264 -crf 16 -tune stillimage \
+  -pix_fmt yuv420p -movflags +faststart examples/social/before-after.mp4
+
+# 4. GitHub social preview card
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --hide-scrollbars \
+  --window-size=1280,640 --force-device-scale-factor=1 \
+  --screenshot=examples/social/og-card.png examples/social/og-card.html
 ```
 
 ## GitHub social preview
 
-Repo → **Settings → General → Social preview** → upload `og-banner.png` or `og-preview.png`.
+Repo → **Settings → General → Social preview** → upload `og-card.png`.
 
-## Post tips
+## Post tip
 
-- **X:** attach `before-after.gif` (or the side PNG if GIF is heavy).
-- **LinkedIn:** attach `before-after-side.png` or `og-banner.png`.
-- Caption: invented vs honest; install `npx skills add albegosu/honest-arch-diagrams`.
+- **X / LinkedIn:** upload `before-after-side.png` (or `og-card.png`)
+- **X video:** `before-after.mp4` (same art, 5s hold)
+- Do not post a GIF
