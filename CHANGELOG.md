@@ -6,6 +6,8 @@ Versions follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.11.1] — 2026-09-25
+
 Distribution release: no new diagram features.
 
 ### Added
@@ -157,7 +159,8 @@ Distribution release: no new diagram features.
 - Initial skill: honesty rules, visual grammar, data model, D2 rendering guidance, and the
   checkout-service example.
 
-[Unreleased]: https://github.com/albegosu/honest-arch-diagrams/compare/v0.11.0...HEAD
+[Unreleased]: https://github.com/albegosu/honest-arch-diagrams/compare/v0.11.1...HEAD
+[0.11.1]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.11.1
 [0.11.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.11.0
 [0.10.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.10.0
 [0.9.0]: https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.9.0
