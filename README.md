@@ -19,8 +19,8 @@ diagrams**. It separates what is *verified* (the request path) from what is *inf
 Works with tools that support the `SKILL.md` standard: Claude Code, Cursor, Gemini CLI,
 GitHub Copilot CLI, OpenCode.
 
-**Latest:** [v0.11.0](https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.11.0) —
-evidence strength on models; Compose + diff in v0.10.
+**Latest:** [v0.11.1](https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.11.1) —
+on npm (`npx honest-arch-diagrams`); evidence strength on models in v0.11.
 
 ## Install
 
