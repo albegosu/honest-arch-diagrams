@@ -8,6 +8,7 @@
 # Keep the final launch visuals (intermediate renders stay ignored)
 !examples/social/before-after-side.png
 !examples/social/og-card.png
+!examples/readme/demo.svg
 
 # Node / tooling
 node_modules/
