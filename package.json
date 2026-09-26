@@ -34,7 +34,8 @@
     "from-openapi-yaml": "node skills/honest-arch-diagrams/adapters/openapi/from-openapi.mjs skills/honest-arch-diagrams/adapters/openapi/fixtures/orders.openapi.yaml",
     "from-trace": "node skills/honest-arch-diagrams/adapters/trace/from-trace.mjs skills/honest-arch-diagrams/adapters/trace/fixtures/checkout.trace.json --app checkout",
     "render": "d2 examples/checkout-service.d2 examples/checkout-service.svg",
-    "prepublishOnly": "npm test"
+    "prepublishOnly": "npm test",
+    "demo": "node examples/readme/build-demo.mjs"
   },
   "keywords": [
     "agent-skills",

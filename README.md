@@ -6,21 +6,32 @@
 [![npm](https://img.shields.io/npm/v/honest-arch-diagrams)](https://www.npmjs.com/package/honest-arch-diagrams)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-An [Agent Skill](https://agentskills.io) for **honest service-topology / request-path
-diagrams**. It separates what is *verified* (the request path) from what is *inferred*
-(companions), and it never invents components.
+**Architecture diagrams that only draw what they can prove.** An [Agent Skill](https://agentskills.io)
+and a zero-dependency CLI that derive a request path from real evidence, lint it and render
+it, and refuse any hop nobody can evidence.
+
+<p align="center">
+  <img src="examples/readme/demo.svg" width="100%" alt="Animated demo: from-k8s derives the checkout request path, lint passes (7 hops, 3 companions) and the path draws hop by hop; an LLM then adds an API Gateway with no evidence, lint fails and the hop is struck out, not drawn.">
+</p>
+
+- **Verified path.** Every hop carries its evidence: `Ingress checkout`, `Service checkout`, `Endpoints checkout`.
+- **Inferred companions.** Datastores and neighbours are dashed, with the evidence on the edge.
+- **Never invented.** A hop without evidence fails the lint and is not drawn. Omitted means absent, not guessed.
+
+Evidence comes from Kubernetes dumps, GitOps / Helm manifests, Docker Compose, Terraform state,
+OpenAPI specs and OpenTelemetry traces. Works with tools that support the `SKILL.md` standard:
+Claude Code, Cursor, Gemini CLI, GitHub Copilot CLI, OpenCode.
+
+**Latest:** [v0.11.1](https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.11.1) —
+on npm (`npx honest-arch-diagrams`); evidence strength on models in v0.11.
+
+## Why
 
 > LLM diagram tools hallucinate. Ask one to "diagram this service" and it draws a Redis, a
 > TLS hop, and an auth gateway it never saw. A confident wrong diagram is worse than none.
 > This skill makes the agent draw only what it can evidence, and label the rest as inferred.
 
 ![Before: an LLM diagram with invented hops. After: the honest request path with labeled companions](examples/social/before-after-side.png)
-
-Works with tools that support the `SKILL.md` standard: Claude Code, Cursor, Gemini CLI,
-GitHub Copilot CLI, OpenCode.
-
-**Latest:** [v0.11.1](https://github.com/albegosu/honest-arch-diagrams/releases/tag/v0.11.1) —
-on npm (`npx honest-arch-diagrams`); evidence strength on models in v0.11.
 
 ## Install
 
@@ -122,7 +133,8 @@ the launch assets live in [`examples/social/`](examples/social/):
 | [`before-after.mp4`](examples/social/before-after.mp4) | X (sharp video — prefer over GIF) |
 | [`og-card.png`](examples/social/og-card.png) | GitHub social preview |
 
-Regen: [`examples/social/README.md`](examples/social/README.md).
+Regen: [`examples/social/README.md`](examples/social/README.md). The animated demo at the top is built from the
+real CLI output: `npm run demo` (`examples/readme/build-demo.mjs`).
 
 ## What it does
 
